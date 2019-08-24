@@ -51,7 +51,7 @@ ulong ATTTrade::TradeAtMarketPrice(int bs=0, const string symbol=NULL, double qt
       } else {
          result = trade.Sell(qtt, symbol, 0.0, stopLoss, takeProfit, comment);   
       }
-   
+
       // Check trading action
       if (result) {
          if (trade.ResultRetcode() == TRADE_RETCODE_DONE) {   
@@ -60,7 +60,7 @@ ulong ATTTrade::TradeAtMarketPrice(int bs=0, const string symbol=NULL, double qt
       }
    }
    
-   // Return ticket id or zero
+   // Return ticket id or zeros
    return ticketId;
 }
 
