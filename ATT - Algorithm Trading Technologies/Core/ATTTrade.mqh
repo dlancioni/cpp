@@ -14,42 +14,42 @@
 //+------------------------------------------------------------------+
 class ATTTrade {
    private:
-     ulong TradeAtMarketPrice(int bs, const string symbol, double qtt, double stopLoss, double takeProfit);
+       ulong TradeAtMarketPrice(const string buyOrSell, const string symbol, double qtt, double stopLoss, double takeProfit);
      
    public:
-     ulong Buy(const string symbol, double qtt, double stopLoss, double takeProfit);
-     ulong Sell(const string symbol, double qtt, double stopLoss, double takeProfit);
+       ulong Buy(const string symbol, double qtt, double stopLoss, double takeProfit);
+       ulong Sell(const string symbol, double qtt, double stopLoss, double takeProfit);
 };
 
 //+------------------------------------------------------------------+
 //| Open or close position at market price                           |
 //+------------------------------------------------------------------+
 ulong ATTTrade::Buy(const string symbol=NULL, double qtt=0.0, double stopLoss=0.0, double takeProfit=0.0) {
-   return ATTTrade::TradeAtMarketPrice(1, symbol, qtt, stopLoss, takeProfit);
+   return ATTTrade::TradeAtMarketPrice("BUY", symbol, qtt, stopLoss, takeProfit);
 }
 ulong ATTTrade::Sell(const string symbol=NULL, double qtt=0.0, double stopLoss=0.0, double takeProfit=0.0) {
-   return ATTTrade::TradeAtMarketPrice(2, symbol, qtt, stopLoss, takeProfit);
+   return ATTTrade::TradeAtMarketPrice("SELL", symbol, qtt, stopLoss, takeProfit);
 }
 
 //+------------------------------------------------------------------+
 //| Core logic to open and close positions at market price           |
 //+------------------------------------------------------------------+
-ulong ATTTrade::TradeAtMarketPrice(int bs=0, const string symbol=NULL, double qtt=0.0, double stopLoss=0.0, double takeProfit=0.0) {
+ulong ATTTrade::TradeAtMarketPrice(const string buyOrSell, const string symbol=NULL, double qtt=0.0, double stopLoss=0.0, double takeProfit=0.0) {
 
    // General Declaration
    CTrade trade;   
    bool result = false;
    ulong ticketId = 0;
-   string comment = "Pending comment yet";    
+   string comment = "Pending comment yet";
    
    // Trade when 1(buy) or 2(Sell), otherwise reteurn zero  
-   if (bs == 1 || bs == 2) {
+   if (buyOrSell == "BUY" || buyOrSell == "SELL") {
    
       // Buy or sell according
-      if (bs == 1) {
+      if (buyOrSell == "BUY") {
          result = trade.Buy(qtt, symbol, 0.0, stopLoss, takeProfit, comment);
       } else {
-         result = trade.Sell(qtt, symbol, 0.0, stopLoss, takeProfit, comment);   
+         result = trade.Sell(qtt, symbol, 0.0, stopLoss, takeProfit, comment);
       }
 
       // Check trading action
