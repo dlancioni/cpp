@@ -20,8 +20,8 @@ class ATTIndicator {
        (
            const string symbol,              // EURUSD, WDOQ19, etc
            ENUM_TIMEFRAMES timeFrame,        // M1, M5, M15, etc
-           int periods,                      // Number of periods or candles (1, 2, 10, 50 etc)
-           int period,                       // MAVG at specific candle - from 1 to periods where 1 is most recent
+           int periods,                      // Number of periods/candles (1, 2, 10, 50 etc)
+           int period,                       // MAVG at specific period/candle from right to left
            ENUM_MA_METHOD method,            // Simple, Exponential, etc
            ENUM_APPLIED_PRICE appliedPrice   // Open Price, Close Price (default), etc
        );
@@ -33,7 +33,7 @@ class ATTIndicator {
 double ATTIndicator::CalculateMovingAvarage(const string symbol,
                                             ENUM_TIMEFRAMES timeFrame,
                                             int periods,
-                                            int period,
+                                            int period=1, // most recent candle
                                             ENUM_MA_METHOD method = MODE_EMA,
                                             ENUM_APPLIED_PRICE appliedPrice = PRICE_CLOSE) {
 

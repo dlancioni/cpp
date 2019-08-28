@@ -17,6 +17,7 @@ class ATTTrade {
        ulong TradeAtMarketPrice(const string buyOrSell, const string symbol, double qtt, double stopLoss, double takeProfit);
      
    public:
+       int openPosition;
        ulong Buy(const string symbol, double qtt, double stopLoss, double takeProfit);
        ulong Sell(const string symbol, double qtt, double stopLoss, double takeProfit);
 };

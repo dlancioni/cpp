@@ -13,48 +13,81 @@
 #property version   "1.00"
 
 // Define input parameters
-input string symbolCode = "EURUSD";
-input double numberOfContracts = 3;
-input double shortAvarage = 5;
-input double longAvarage = 15;
+input string assetCode = "WDOU19";
+input double numberOfContracts = 1;
+input int shortPeriod = 5;
+input int longPeriod = 15;
+input ENUM_TIMEFRAMES frame = 1; // Five minutes
 
 // Initialize class instances
 ATTTrade _ATTTrade;
 ATTPrice _ATTPrice;
 ATTIndicator _ATTIndicator;
 
+bool bought = false;
+bool sold = false;
+
+// Main loop
+void OnTick()
+{
+   // Calculate current prices
+   double price = _ATTPrice.GetBid(assetCode);
+   double stopLoss = _ATTPrice.GetStopLoss(price, 150);
+   double takeProfit = _ATTPrice.GetTakeProfit(price, 50);
+
+   // Calculate EMA for short and long period
+   double shortAvg = _ATTIndicator.CalculateMovingAvarage(assetCode, frame, shortPeriod);
+   double longAvg = _ATTIndicator.CalculateMovingAvarage(assetCode, frame, longPeriod);
+   
+   // Handle crossing up
+   if (shortAvg > longAvg) {
+   
+      // Close current position
+      if (sold == true) {
+         _ATTTrade.Sell(assetCode, numberOfContracts, stopLoss, takeProfit);
+         sold = false;
+      }
+      
+      // Open long position
+      if (bought == false) {
+         _ATTTrade.Buy(assetCode, numberOfContracts, stopLoss, takeProfit);
+         bought = true;
+      }      
+   } 
+   
+   // Handle crossing down
+   if (shortAvg < longAvg) {
+   
+      // Close current position
+      if (bought == true) {
+         _ATTTrade.Sell(assetCode, numberOfContracts, stopLoss, takeProfit);
+         bought = false;
+      }
+
+      // Open long position
+      if (sold == false) {
+         _ATTTrade.Sell(assetCode, numberOfContracts, stopLoss, takeProfit);
+         sold = true;
+      }
+   }
+   
+   
+   Comment("shortAvg: ", shortAvg, " longAvg: ", longAvg, " price: ", price);
+   
+   
+}
+
 // On start
 int OnInit() 
-{
+{   
+   bought = false;
+   sold = false;
 
-   double price = _ATTPrice.GetBid(symbolCode);
-   double stopLoss = _ATTPrice.GetStopLoss(price, 50);
-   double takeProfit = _ATTPrice.GetTakeProfit(price, 50);
-   //_ATTTrade.Buy(symbolCode, numberOfContracts, stopLoss, takeProfit);   
-   
    return(INIT_SUCCEEDED);
 }
 
 // On stop
 void OnDeinit(const int reason)
 {
-
-}
-
-// Main loop
-void OnTick()
-{
-
-   double avg1 = _ATTIndicator.CalculateMovingAvarage(_Symbol, _Period, 5, 1);
-   double avg2 = _ATTIndicator.CalculateMovingAvarage(_Symbol, _Period, 5, 2);
-   double avg3 = _ATTIndicator.CalculateMovingAvarage(_Symbol, _Period, 5, 3);
-   double avg4 = _ATTIndicator.CalculateMovingAvarage(_Symbol, _Period, 5, 4);
-   double avg5 = _ATTIndicator.CalculateMovingAvarage(_Symbol, _Period, 5, 5);
    
-   
-   Comment("Moving avarage: ", avg1, "---", avg2, "---", avg3, "---", avg4, "---", avg5);
-   
-   
-   //Comment("Local time is ", TimeLocal());
-   //Comment("Sell trade value: ", price, "within stop loss at ", stopLoss, " and stop gain ", stopGain);   
 }
