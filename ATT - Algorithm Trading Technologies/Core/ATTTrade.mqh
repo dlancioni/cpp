@@ -14,28 +14,29 @@
 //+------------------------------------------------------------------+
 class ATTTrade {
    private:
-       ulong TradeAtMarketPrice(const string buyOrSell, const string symbol, double qtt, double stopLoss, double takeProfit);
+       ulong TradeAtMarketPrice(const string bs, const string symbol, double qtt, double sl, double tp);
      
    public:
        int openPosition;
-       ulong Buy(const string symbol, double qtt, double stopLoss, double takeProfit);
-       ulong Sell(const string symbol, double qtt, double stopLoss, double takeProfit);
+       ulong Buy(const string symbol, double qtt, double sl, double tp);
+       ulong Sell(const string symbol, double qtt, double sl, double tp);
+       void CloseAllPositions();
 };
 
 //+------------------------------------------------------------------+
 //| Open or close position at market price                           |
 //+------------------------------------------------------------------+
-ulong ATTTrade::Buy(const string symbol=NULL, double qtt=0.0, double stopLoss=0.0, double takeProfit=0.0) {
-   return ATTTrade::TradeAtMarketPrice("BUY", symbol, qtt, stopLoss, takeProfit);
+ulong ATTTrade::Buy(const string symbol=NULL, double qtt=0.0, double sl=0.0, double tp=0.0) {
+   return ATTTrade::TradeAtMarketPrice("BUY", symbol, qtt, sl, tp);
 }
-ulong ATTTrade::Sell(const string symbol=NULL, double qtt=0.0, double stopLoss=0.0, double takeProfit=0.0) {
-   return ATTTrade::TradeAtMarketPrice("SELL", symbol, qtt, stopLoss, takeProfit);
+ulong ATTTrade::Sell(const string symbol=NULL, double qtt=0.0, double sl=0.0, double tp=0.0) {
+   return ATTTrade::TradeAtMarketPrice("SELL", symbol, qtt, sl, tp);
 }
 
 //+------------------------------------------------------------------+
 //| Core logic to open and close positions at market price           |
 //+------------------------------------------------------------------+
-ulong ATTTrade::TradeAtMarketPrice(const string buyOrSell, const string symbol=NULL, double qtt=0.0, double stopLoss=0.0, double takeProfit=0.0) {
+ulong ATTTrade::TradeAtMarketPrice(const string bs, const string symbol=NULL, double qtt=0.0, double sl=0.0, double tp=0.0) {
 
    // General Declaration
    CTrade trade;   
@@ -44,18 +45,18 @@ ulong ATTTrade::TradeAtMarketPrice(const string buyOrSell, const string symbol=N
    string comment = "Pending comment yet";
    
    // Trade when 1(buy) or 2(Sell), otherwise reteurn zero  
-   if (buyOrSell == "BUY" || buyOrSell == "SELL") {
+   if (bs=="BUY" || bs=="SELL") {
    
       // Buy or sell according
-      if (buyOrSell == "BUY") {
-         result = trade.Buy(qtt, symbol, 0.0, stopLoss, takeProfit, comment);
+      if (bs=="BUY") {
+         result = trade.Buy(qtt, symbol, 0.0, sl, tp, comment);
       } else {
-         result = trade.Sell(qtt, symbol, 0.0, stopLoss, takeProfit, comment);
+         result = trade.Sell(qtt, symbol, 0.0, sl, tp, comment);
       }
 
       // Check trading action
       if (result) {
-         if (trade.ResultRetcode() == TRADE_RETCODE_DONE) {   
+         if (trade.ResultRetcode()==TRADE_RETCODE_DONE) {   
             ticketId = trade.ResultDeal();
          }
       }
@@ -65,3 +66,19 @@ ulong ATTTrade::TradeAtMarketPrice(const string buyOrSell, const string symbol=N
    return ticketId;
 }
 
+//+------------------------------------------------------------------+
+//| Close all open positions at market price                         |
+//+------------------------------------------------------------------+
+void ATTTrade::CloseAllPositions() {
+
+    // General Declaration
+    CTrade trade;   
+    ulong id = 0;
+    ulong ticketId = 0;
+
+    // Close open positions
+     for (int i=PositionsTotal()-1; i>=0; i--) {
+	      id = PositionGetTicket(i);
+	      ticketId = trade.PositionClose(id);
+     }   
+}

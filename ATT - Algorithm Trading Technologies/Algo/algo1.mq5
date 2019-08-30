@@ -12,82 +12,99 @@
 #property link      "https://www.mql5.com"
 #property version   "1.00"
 
-// Define input parameters
-input string assetCode = "WDOU19";
-input double numberOfContracts = 1;
-input int shortPeriod = 5;
-input int longPeriod = 15;
-input ENUM_TIMEFRAMES frame = 1; // Five minutes
+// Define input parameters (comments are labels)
+input string assetCode = "WINV19";     // Asset Code
+input double contracts = 1;            // Number of Contracts
+input int shortPeriod = 1;             // Moving Avarage - Short
+input int longPeriod = 5;              // Moving Avarage - Long
+input ENUM_TIMEFRAMES chartTime = 1;  // Chart Time (M1, M5, M15)
 
-// Initialize class instances
+//
+// General Declaration
+//
+double priceBid = 0.0;           // Current bid price
+double priceAsk = 0.0;           // Current ask price
+bool buyPositionIsOpen = false;  // Control if we have open bought position
+bool sellPositionIsOpen = false; // Control if we have open sold position
+double shortMovingAvarage = 0;   // Short moving avarage 
+double longMovingAvarage = 0;    // Long moving avarage
+double stopLoss = 0.0;           // Stop loss for current trade
+double takeProfit = 0.0;         // Profit value for current trade
+int pointsLoss = 0;             // Default stop loss
+int pointsGain = 0;            // Default stop gain
+
 ATTTrade _ATTTrade;
 ATTPrice _ATTPrice;
 ATTIndicator _ATTIndicator;
 
-bool bought = false;
-bool sold = false;
+//
+// Start and finish events
+//
+int OnInit() 
+{   
+    return(INIT_SUCCEEDED);
+}
+void OnDeinit(const int reason)
+{
+}
 
+//
 // Main loop
+//
 void OnTick()
 {
    // Calculate current prices
-   double price = _ATTPrice.GetBid(assetCode);
-   double stopLoss = _ATTPrice.GetStopLoss(price, 150);
-   double takeProfit = _ATTPrice.GetTakeProfit(price, 50);
+   priceBid = _ATTPrice.GetBid(assetCode);
+   priceAsk = _ATTPrice.GetAsk(assetCode);
+   
+   if (priceBid==0.0 || priceAsk==0.0) {
+      Alert("No price available for ", assetCode, ". Exiting program");
+      return;
+   }
 
    // Calculate EMA for short and long period
-   double shortAvg = _ATTIndicator.CalculateMovingAvarage(assetCode, frame, shortPeriod);
-   double longAvg = _ATTIndicator.CalculateMovingAvarage(assetCode, frame, longPeriod);
+   shortMovingAvarage = _ATTIndicator.CalculateMovingAvarage(assetCode, chartTime, shortPeriod);
+   longMovingAvarage = _ATTIndicator.CalculateMovingAvarage(assetCode, chartTime, longPeriod);
    
    // Handle crossing up
-   if (shortAvg > longAvg) {
+   if (shortMovingAvarage > longMovingAvarage) {
    
       // Close current position
-      if (sold == true) {
-         _ATTTrade.Sell(assetCode, numberOfContracts, stopLoss, takeProfit);
-         sold = false;
+      if (sellPositionIsOpen == true) {
+         _ATTTrade.CloseAllPositions();
+         sellPositionIsOpen = false;
       }
       
       // Open long position
-      if (bought == false) {
-         _ATTTrade.Buy(assetCode, numberOfContracts, stopLoss, takeProfit);
-         bought = true;
+      if (buyPositionIsOpen == false) {
+      
+         stopLoss = _ATTPrice.GetStopLoss(priceBid, pointsLoss);
+         takeProfit = _ATTPrice.GetTakeProfit(priceAsk, pointsGain);      
+               
+         _ATTTrade.Buy(assetCode, contracts, 0.0, 0.0);
+         buyPositionIsOpen = true;
       }      
    } 
    
    // Handle crossing down
-   if (shortAvg < longAvg) {
+   if (shortMovingAvarage < longMovingAvarage) {
    
       // Close current position
-      if (bought == true) {
-         _ATTTrade.Sell(assetCode, numberOfContracts, stopLoss, takeProfit);
-         bought = false;
+      if (buyPositionIsOpen == true) {
+         _ATTTrade.CloseAllPositions();
+         buyPositionIsOpen = false;
       }
 
       // Open long position
-      if (sold == false) {
-         _ATTTrade.Sell(assetCode, numberOfContracts, stopLoss, takeProfit);
-         sold = true;
+      if (sellPositionIsOpen == false) {     
+         _ATTTrade.Sell(assetCode, contracts, 0.0, 0.0);
+         sellPositionIsOpen = true;
       }
    }
    
    
-   Comment("shortAvg: ", shortAvg, " longAvg: ", longAvg, " price: ", price);
+   Comment("shortMovingAvarage: ", shortMovingAvarage, " longMovingAvarage: ", longMovingAvarage, " price: ", (priceBid + priceAsk)/2);
    
    
 }
 
-// On start
-int OnInit() 
-{   
-   bought = false;
-   sold = false;
-
-   return(INIT_SUCCEEDED);
-}
-
-// On stop
-void OnDeinit(const int reason)
-{
-   
-}

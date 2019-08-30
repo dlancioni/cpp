@@ -47,7 +47,7 @@ double ATTPrice::GetPrice(const string symbol, const string bidOrAsk) {
    double price = 0.0;
    
    // Trade when 1(buy) or 2(Sell), otherwise reteurn zero  
-   if (bidOrAsk == "BID" || bidOrAsk == "ASK") {
+   if (bidOrAsk=="BID" || bidOrAsk=="ASK") {
    
        if (bidOrAsk == "BID") {
            price = NormalizeDouble(SymbolInfoDouble(symbol, SYMBOL_BID), _Digits);
