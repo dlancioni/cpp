@@ -105,15 +105,16 @@ void TradeOnCrossing(double priceBid, double priceAsk, double shortMovingAvarage
    double priceLoss = 0.0;          // Stop loss for current trade
    double priceProfit = 0.0;        // Profit value for current trade
    bool cross = false;              // Start openning a position on current tendence
-   
-   Print("orderIdBuy: ", orderIdBuy, " orderIdSell: ", orderIdSell);
-   Print("shortMovingAvarage: ", shortMovingAvarage, " longMovingAvarage: ", longMovingAvarage);
       
    // Control last cross   
    if ((shortMovingAvarage) > longMovingAvarage) {
-      if (lastCross!="S") {cross=true;} lastCross="S";
+      if (lastCross!="S") {cross=true;} 
+      lastCross="S";
+      Print("short: ", shortMovingAvarage, " long: ", longMovingAvarage, " Tendence: UP");
    } else {
-      if (lastCross!="L") {cross=true;} lastCross="L";
+      if (lastCross!="L") {cross=true;} 
+      lastCross="L";
+      Print("short: ", shortMovingAvarage, " long: ", longMovingAvarage, " Tendence: DOWN");      
    }
 
    // Crossing up
