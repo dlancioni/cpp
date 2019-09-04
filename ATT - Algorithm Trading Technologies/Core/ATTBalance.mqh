@@ -44,10 +44,23 @@ double ATTBalance::GetMargin() {
 double ATTBalance::IsResultOverLimits(double ib, double loss, double profit) {
 
    bool flag = false;
-   double result = (ib - ATTBalance::GetEquity());
-      
-   if (result<=(loss*-1) || result>=profit) {
-       flag = true;
+   double result = 0.0;
+
+   // Calculate current result
+   result = (ib - ATTBalance::GetEquity());
+
+   // Limit the daily loses
+   if (MathAbs(loss) > 0) {
+      if (result<=(loss*-1)) {
+          flag = true;
+      }   
+   }
+
+   // Limit the daily profit
+   if (MathAbs(profit) > 0) {
+      if (result>=profit) {
+          flag = true;
+      }   
    }
       
    return flag;

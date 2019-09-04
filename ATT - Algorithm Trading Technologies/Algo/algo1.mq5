@@ -19,14 +19,13 @@
 //
 // Define input parameters (comments are labels)
 //
-input string assetCode = "WINV19";     // Asset Code
 input double contracts = 1;            // Number of Contracts
 input int shortPeriod = 1;             // Moving Avarage - Short
 input int longPeriod = 2;              // Moving Avarage - Long
 input ENUM_TIMEFRAMES chartTime = 5;   // Chart Time (M1, M5, M15)
 input double factor = 50;              // Points used to open future price order
-input double dailyLoss = 200;          // Daily loss limit (per contract)
-input double dailyProfit = 100;        // Daily profit limit (per contract)
+input double dailyLoss = 0;            // Daily loss limit (per contract) - zero for no limit
+input double dailyProfit = 0;          // Daily profit limit (per contract) - zero for no limit
 
 //
 // General Declaration
@@ -40,6 +39,7 @@ ATTMath _ATTMath;
 ulong orderIdBuy = 0;               // Current open ticket
 ulong orderIdSell = 0;              // Current open ticket
 double initialBalance = 0.0;        // Used to limit profit and loss in daily basis
+string assetCode = "";              // Current asset on chart
 string lastCross = "";
 
 //
@@ -47,11 +47,14 @@ string lastCross = "";
 //
 int OnInit() {
 
-    // Used to limit profit and loss in daily basis
-    initialBalance = _ATTBalance.GetBalance();
+   // Current asset on chart
+   assetCode = Symbol();
 
-    // Go ahead
-    return(INIT_SUCCEEDED);
+   // Used to limit profit and loss in daily basis
+   initialBalance = _ATTBalance.GetBalance();
+
+   // Go ahead
+   return(INIT_SUCCEEDED);
 }
 
 //
@@ -90,20 +93,23 @@ void OnTick() {
             longMovingAvarage = _ATTIndicator.CalculateMovingAvarage(assetCode, chartTime, longPeriod);
             
             // Strategy 1: open long positions after crossing
-            TradeOnCrossing(priceBid, priceAsk, shortMovingAvarage, longMovingAvarage);
+            TradeOnMovingAvarageCross(priceBid, priceAsk, shortMovingAvarage, longMovingAvarage);
             
          } else {
-            Print("Cannot open second position")
+            Print("Cannot open second position");
          }
       } else {
-          Print("No price available")
+          Print("No price available");
       }
    } else {
-       Print("Out of daily limits, please check pnl on history tab")
+       Print("Out of daily limits, please check pnl on history tab");
    }
 }
 
-void TradeOnCrossing(double priceBid, double priceAsk, double shortMovingAvarage, double longMovingAvarage) {
+//
+// Open a position in favor of tendence and wait for the boom
+//
+void TradeOnMovingAvarageCross(double priceBid, double priceAsk, double shortMovingAvarage, double longMovingAvarage) {
 
    // General declaration
    double price = 0;
@@ -128,8 +134,6 @@ void TradeOnCrossing(double priceBid, double priceAsk, double shortMovingAvarage
          orderIdBuy = _ATTTrade.CloseAllOrders();
       }
    }
-
-   Print("orderIdSell: ", orderIdSell, " orderIdBuy: ", orderIdBuy);      
   
    // Cross up, must cancel short orders and open long orders   
    if (crossUp) {
