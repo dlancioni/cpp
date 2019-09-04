@@ -84,20 +84,14 @@ void OnTick() {
 
       // If no price, no deal (markets closed, or off-line)
       if (priceBid>0.0 || priceAsk>0.0) {
+            
+         // Calculate EMA for short and long period
+         shortMovingAvarage = _ATTIndicator.CalculateMovingAvarage(assetCode, chartTime, shortPeriod);
+         longMovingAvarage = _ATTIndicator.CalculateMovingAvarage(assetCode, chartTime, longPeriod);
+         
+         // Strategy 1: open long positions after crossing
+         TradeOnMovingAvarageCross(priceBid, priceAsk, shortMovingAvarage, longMovingAvarage);
 
-         // Do not open more than one position at a time
-         if (PositionsTotal() == 0) {
-            
-            // Calculate EMA for short and long period
-            shortMovingAvarage = _ATTIndicator.CalculateMovingAvarage(assetCode, chartTime, shortPeriod);
-            longMovingAvarage = _ATTIndicator.CalculateMovingAvarage(assetCode, chartTime, longPeriod);
-            
-            // Strategy 1: open long positions after crossing
-            TradeOnMovingAvarageCross(priceBid, priceAsk, shortMovingAvarage, longMovingAvarage);
-            
-         } else {
-            Print("Cannot open second position");
-         }
       } else {
           Print("No price available");
       }
@@ -117,40 +111,48 @@ void TradeOnMovingAvarageCross(double priceBid, double priceAsk, double shortMov
    double priceProfit = 0.0;        // Not used as trading checkpoints on profit
    bool crossUp = false;            // Start openning a position on current tendence
    bool crossDn = false;            // Start openning a position on current tendence
-      
-   // Control last cross   
-   if ((shortMovingAvarage) > longMovingAvarage) {
-      if (lastCross!="S") {
-         crossUp=true;
-         crossDn=false;
-         lastCross="S";
-         orderIdSell = _ATTTrade.CloseAllOrders();
+   
+   // Do not open more than one position at a time
+   if (PositionsTotal() == 0) {
+         
+      // Control last cross   
+      if ((shortMovingAvarage) > longMovingAvarage) {
+         if (lastCross!="S") {
+            crossUp=true;
+            crossDn=false;
+            lastCross="S";
+            orderIdSell = _ATTTrade.CloseAllOrders();
+         } 
+      } else {
+         if (lastCross!="L") {
+            crossUp=false;
+            crossDn=true;
+            lastCross="L";
+            orderIdBuy = _ATTTrade.CloseAllOrders();
+         }
+      }
+     
+      // Cross up, must cancel short orders and open long orders   
+      if (crossUp) {
+         if (orderIdSell == 0) {
+            price = _ATTPrice.GetPrice("B", priceAsk, points);
+            priceLoss = priceAsk;
+            orderIdBuy = _ATTTrade.Buy(assetCode, contracts, price, priceLoss, priceProfit);
+         }
       } 
+   
+      // Cross down, must cancel long orders and open short orders   
+      if (crossDn) {      
+         if (orderIdBuy == 0) {            
+            price = _ATTPrice.GetPrice("S", priceBid, points);
+            priceLoss = priceBid;
+            orderIdSell = _ATTTrade.Sell(assetCode, contracts, price, priceLoss, priceProfit);
+         }
+      }
    } else {
-      if (lastCross!="L") {
-         crossUp=false;
-         crossDn=true;
-         lastCross="L";
-         orderIdBuy = _ATTTrade.CloseAllOrders();
-      }
-   }
-  
-   // Cross up, must cancel short orders and open long orders   
-   if (crossUp) {
-      if (orderIdSell == 0) {
-         price = _ATTPrice.GetPrice("B", priceAsk, points);
-         priceLoss = priceAsk;
-         orderIdBuy = _ATTTrade.Buy(assetCode, contracts, price, priceLoss, priceProfit);
-      }
-   } 
-
-   // Cross down, must cancel long orders and open short orders   
-   if (crossDn) {      
-      if (orderIdBuy == 0) {            
-         price = _ATTPrice.GetPrice("S", priceBid, points);
-         priceLoss = priceBid;
-         orderIdSell = _ATTTrade.Sell(assetCode, contracts, price, priceLoss, priceProfit);
-      }
+   
+      // Handle dinamic stop loss
+      
    }
 
 }
