@@ -139,7 +139,7 @@ void TradeOnMovingAvarageCross(double priceBid, double priceAsk, double shortMov
             priceLoss = priceAsk;
             orderIdBuy = _ATTTrade.Buy(assetCode, contracts, price, priceLoss, priceProfit);
          }
-      } 
+      }
    
       // Cross down, must cancel long orders and open short orders   
       if (crossDn) {      

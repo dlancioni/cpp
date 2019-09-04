@@ -1,4 +1,8 @@
+#include "..\Core\ATTTrade.mqh"
+#include "..\Core\ATTPrice.mqh"
+#include "..\Core\ATTIndicator.mqh"
 #include "..\Core\ATTBalance.mqh"
+#include "..\Core\ATTMath.mqh"
 
 //+------------------------------------------------------------------+
 //|                                                         test.mq5 |
@@ -18,7 +22,9 @@ int OnInit()
   {
 //---
    
-Print(_ATTBalance.IsResultOverLimits(100000, 100, 200));
+//Print(_ATTBalance.IsResultOverLimits(100000, 100, 200));
+ATTTrade _ATTTrade;
+_ATTTrade.ModifyPosition(31579645, 1.11, 1.09);
    
    
    

@@ -17,9 +17,10 @@ class ATTTrade {
        ulong TradeAtMarketPrice(const string bs, const string symbol, double qtt, double price, double sl, double tp);
      
    public:
-       ulong Buy(const string symbol, double qtt, double price, double sl, double tp);       
-       ulong Sell(const string symbol, double qtt, double price, double sl, double tp);       
-       
+       ulong Buy(const string symbol, double qtt, double price, double sl, double tp);
+       ulong Sell(const string symbol, double qtt, double price, double sl, double tp);
+       bool ModifyPosition(ulong orderId, double sl, double tp);
+
        void CloseAllPositions();
        ulong DeleteOrder(ulong tid);
        ulong CloseAllOrders();
@@ -106,7 +107,7 @@ void ATTTrade::CloseAllPositions() {
 ulong ATTTrade::CloseAllOrders() {
 
     // General Declaration
-    CTrade trade;   
+    CTrade trade;
     ulong id = 0;
 
     // Close open positions
@@ -118,25 +119,14 @@ ulong ATTTrade::CloseAllOrders() {
      return 0;   
 }
 
-bool ATTTrade::GetAccountType() {
+//+------------------------------------------------------------------+
+//| Modify existing order                                            |
+//+------------------------------------------------------------------+
+bool ATTTrade::ModifyPosition(ulong ticketId=0, double sl=0.0, double tp=0.0) {
 
-    ENUM_ACCOUNT_TRADE_MODE tradeMode=(ENUM_ACCOUNT_TRADE_MODE)AccountInfoInteger(ACCOUNT_TRADE_MODE); 
-
-    //--- Find out the account type 
-    switch(tradeMode) { 
-       case(ACCOUNT_TRADE_MODE_DEMO): 
-           Print("This is a demo account"); 
-           break; 
-       case(ACCOUNT_TRADE_MODE_CONTEST): 
-           Print("This is a competition account"); 
-           break; 
-       default:
-           Print("This is a real account!"); 
-    } 
-    
-    return true;
-
+    // General Declaration
+    CTrade trade;
+    bool status = false;    
+    status = trade.PositionModify(ticketId, sl, tp);
+    return status;
 }
-
-
-
