@@ -64,37 +64,42 @@ void OnDeinit(const int reason) {
 //
 // Main loop
 //
-void OnTick()
-{
+void OnTick() {
 
    double shortMovingAvarage = 0;   // Short moving avarage 
    double longMovingAvarage = 0;    // Long moving avarage
    double priceBid = 0.0;           // Current bid price
    double priceAsk = 0.0;           // Current ask price   
 
-   // Get current prices
-   priceBid = _ATTPrice.GetBid(assetCode);
-   priceAsk = _ATTPrice.GetAsk(assetCode);
-   
-   // If no price, something is wrong - stop everything
-   if (priceBid==0.0 || priceAsk==0.0) {
-      ExpertRemove();
-      Alert("No price available for ", assetCode, ". Exiting program");
-   }
 
    // if result touch the limits - stop everything  
    if (_ATTBalance.IsResultOverLimits(initialBalance, dailyLoss, dailyProfit) == false) {
 
-      // Do not open more than one position at a time
-      if (PositionsTotal() == 0) {
-         
-         // Calculate EMA for short and long period
-         shortMovingAvarage = _ATTIndicator.CalculateMovingAvarage(assetCode, chartTime, shortPeriod);
-         longMovingAvarage = _ATTIndicator.CalculateMovingAvarage(assetCode, chartTime, longPeriod);
-         
-         // Strategy 1: open long positions after crossing
-         TradeOnCrossing(priceBid, priceAsk, shortMovingAvarage, longMovingAvarage);     
+      // Get current prices
+      priceBid = _ATTPrice.GetBid(assetCode);
+      priceAsk = _ATTPrice.GetAsk(assetCode);
+
+      // If no price, no deal (markets closed, or off-line)
+      if (priceBid>0.0 || priceAsk>0.0) {
+
+         // Do not open more than one position at a time
+         if (PositionsTotal() == 0) {
+            
+            // Calculate EMA for short and long period
+            shortMovingAvarage = _ATTIndicator.CalculateMovingAvarage(assetCode, chartTime, shortPeriod);
+            longMovingAvarage = _ATTIndicator.CalculateMovingAvarage(assetCode, chartTime, longPeriod);
+            
+            // Strategy 1: open long positions after crossing
+            TradeOnCrossing(priceBid, priceAsk, shortMovingAvarage, longMovingAvarage);
+            
+         } else {
+            Print("Cannot open second position")
+         }
+      } else {
+          Print("No price available")
       }
+   } else {
+       Print("Out of daily limits, please check pnl on history tab")
    }
 }
 
