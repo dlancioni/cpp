@@ -111,6 +111,7 @@ void TradeOnMovingAvarageCross(double priceBid, double priceAsk, double shortMov
    double priceProfit = 0.0;        // Not used as trading checkpoints on profit
    bool crossUp = false;            // Start openning a position on current tendence
    bool crossDn = false;            // Start openning a position on current tendence
+   double margin = 0.0;
    
    // Do not open more than one position at a time
    if (PositionsTotal() == 0) {
@@ -135,7 +136,7 @@ void TradeOnMovingAvarageCross(double priceBid, double priceAsk, double shortMov
       // Cross up, must cancel short orders and open long orders   
       if (crossUp) {
          if (orderIdSell == 0) {
-            price = _ATTPrice.GetPrice("B", priceAsk, points);
+            price = _ATTPrice.Sum(priceAsk, points);
             priceLoss = priceAsk;
             orderIdBuy = _ATTTrade.Buy(assetCode, contracts, price, priceLoss, priceProfit);
          }
@@ -144,14 +145,31 @@ void TradeOnMovingAvarageCross(double priceBid, double priceAsk, double shortMov
       // Cross down, must cancel long orders and open short orders   
       if (crossDn) {      
          if (orderIdBuy == 0) {            
-            price = _ATTPrice.GetPrice("S", priceBid, points);
+            price = _ATTPrice.Subtract(priceBid, points);
             priceLoss = priceBid;
             orderIdSell = _ATTTrade.Sell(assetCode, contracts, price, priceLoss, priceProfit);
          }
       }
    } else {
    
-      // Handle dinamic stop loss
+      // Define a difference to trigger next stop
+      margin = (2*Point());
+   
+      // Handle dinamic stop on buy
+      if (orderIdBuy>0) {
+         if (priceBid > (priceLoss + margin)) {
+            priceLoss = _ATTPrice.Sum(priceLoss, points);
+            _ATTTrade.ModifyPosition(orderIdBuy, priceLoss, 0.00);
+         }
+      }
+
+      // Handle dinamic stop on sell      
+      if (orderIdSell>0) {
+         if (priceAsk < (priceLoss - margin)) {
+            priceLoss = _ATTPrice.Subtract(priceLoss, points);
+            _ATTTrade.ModifyPosition(orderIdSell, priceLoss, 0.00);
+         }      
+      }      
       
    }
 

@@ -16,7 +16,8 @@ class ATTPrice {
    public:
        double GetBid(const string symbol);
        double GetAsk(const string symbol);
-       double GetPrice(const string buyOrSell, double price, double pts);
+       double Sum(double value, double pts);
+       double Subtract(double value, double pts);
 };
 
 //+------------------------------------------------------------------+
@@ -54,15 +55,14 @@ double ATTPrice::GetBidOrAsk(const string symbol, const string bidOrAsk) {
 //+------------------------------------------------------------------+
 //| Calculate loss or profits                                        |
 //+------------------------------------------------------------------+
-double ATTPrice::GetPrice(const string buyOrSell="", double price=0.0, double pts=0.0) {
-
+double ATTPrice::Sum(double price=0.0, double pts=0.0) {
    double value = 0.0;
-      
-   if (buyOrSell == "B") {
-      value=NormalizeDouble(price+(pts*_Point), _Digits);
-   } else {
-      value=NormalizeDouble(price-(pts*_Point), _Digits);   
-   }
-   
+   value=NormalizeDouble(price+(pts*Point()), _Digits);   
+   return value;
+}
+
+double ATTPrice::Subtract(double price=0.0, double pts=0.0) {
+   double value = 0.0;
+   value=NormalizeDouble(price-(pts*Point()), _Digits);   
    return value;
 }
