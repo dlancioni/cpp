@@ -50,9 +50,6 @@ double priceProfit = 0.0;           // Not used as trading checkpoints on profit
 //
 int OnInit() {
 
-   // Close existing orders
-   _ATTTrade.CloseAllOrders();
-
    // Current asset on chart
    assetCode = Symbol();
 
@@ -67,7 +64,7 @@ int OnInit() {
 // Something went wrong, lets stop everything
 //
 void OnDeinit(const int reason) {
-    Print(TimeCurrent(),": " ,__FUNCTION__," Reason code = ", reason); 
+    Alert(TimeCurrent(),": " ,__FUNCTION__," Reason code = ", reason); 
 }
 
 //
@@ -94,6 +91,8 @@ void OnTick() {
          // Calculate EMA for short and long period
          shortMovingAvarage = _ATTIndicator.CalculateMovingAvarage(assetCode, chartTime, shortPeriod);
          longMovingAvarage = _ATTIndicator.CalculateMovingAvarage(assetCode, chartTime, longPeriod);
+         
+         Print("Bid/Ask: ", priceBid, "/", priceAsk, " Avg S/L: ", shortMovingAvarage, "/ ", longMovingAvarage);
          
          // Strategy 1: open long positions after crossing
          TradeOnMovingAvarageCross(priceBid, priceAsk, shortMovingAvarage, longMovingAvarage);
