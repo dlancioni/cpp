@@ -136,28 +136,34 @@ void TradeOnMovingAvarageCross(double priceBid, double priceAsk, double shortMov
          }
       }
      
-      // Cross up, must cancel short orders and open long orders   
-      if (crossUp) {
+      // Make sure we have only one order at a time
+      if (OrdersTotal() == 0) {
       
-         if (orderIdSell == 0) {
-            priceProfit = 0.0;
-            priceDeal = _ATTPrice.Sum(priceAsk, points);
-            priceLoss = priceAsk;
-            priceProfit = _ATTPrice.Sum(priceDeal, points);
-            orderIdBuy = _ATTTrade.Buy(assetCode, contracts, priceDeal, priceLoss, DINAMIC_PROFIT);
+         // Cross up, must cancel short orders and open long orders   
+         if (crossUp) {
+         
+            if (orderIdSell == 0) {
+               priceProfit = 0.0;
+               priceDeal = _ATTPrice.Sum(priceAsk, points);
+               priceLoss = priceAsk;
+               priceProfit = _ATTPrice.Sum(priceDeal, points);
+               orderIdBuy = _ATTTrade.Buy(assetCode, contracts, priceDeal, priceLoss, DINAMIC_PROFIT);
+            }
          }
+      
+         // Cross down, must cancel long orders and open short orders   
+         if (crossDn) {      
+            if (orderIdBuy == 0) {        
+               priceProfit = 0.0;         
+               priceDeal = _ATTPrice.Subtract(priceBid, points);
+               priceLoss = priceBid;
+               priceProfit = _ATTPrice.Subtract(priceDeal, points);
+               orderIdSell = _ATTTrade.Sell(assetCode, contracts, priceDeal, priceLoss, DINAMIC_PROFIT);
+            }
+         }      
       }
-   
-      // Cross down, must cancel long orders and open short orders   
-      if (crossDn) {      
-         if (orderIdBuy == 0) {        
-            priceProfit = 0.0;         
-            priceDeal = _ATTPrice.Subtract(priceBid, points);
-            priceLoss = priceBid;
-            priceProfit = _ATTPrice.Subtract(priceDeal, points);
-            orderIdSell = _ATTTrade.Sell(assetCode, contracts, priceDeal, priceLoss, DINAMIC_PROFIT);
-         }
-      }
+      
+      
    } else {
    
       // Set take profit as stop loss (duplicate the target)      
