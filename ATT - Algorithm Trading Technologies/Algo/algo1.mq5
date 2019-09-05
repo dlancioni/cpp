@@ -23,7 +23,7 @@ input double contracts = 1;            // Number of Contracts
 input int shortPeriod = 1;             // Moving Avarage - Short
 input int longPeriod = 2;              // Moving Avarage - Long
 input ENUM_TIMEFRAMES chartTime = 5;   // Chart Time (M1, M5, M15)
-input double points = 100;             // Default stop loss and trail unit. Price=1000, sl=900, tp=1100, 1200...
+input double points = 10;             // Default stop loss and trail unit. Price=1000, sl=900, tp=1100, 1200...
 input double dailyLoss = 0;            // Daily loss limit (per contract) - zero for no limit
 input double dailyProfit = 0;          // Daily profit limit (per contract) - zero for no limit
 
@@ -40,12 +40,18 @@ ulong orderIdBuy = 0;               // Current open ticket
 ulong orderIdSell = 0;              // Current open ticket
 double initialBalance = 0.0;        // Used to limit profit and loss in daily basis
 string assetCode = "";              // Current asset on chart
-string lastCross = "";
+string lastCross = "";              // Used to avoid calling trades on every cross
+double priceDeal = 0;               // Current trade price   
+double priceLoss = 0.0;             // Stop loss for current trade
+double priceProfit = 0.0;           // Not used as trading checkpoints on profit
 
 //
 // Start and finish events
 //
 int OnInit() {
+
+   // Close existing orders
+   _ATTTrade.CloseAllOrders();
 
    // Current asset on chart
    assetCode = Symbol();
@@ -106,11 +112,9 @@ void OnTick() {
 void TradeOnMovingAvarageCross(double priceBid, double priceAsk, double shortMovingAvarage, double longMovingAvarage) {
 
    // General declaration
-   double price = 0;
-   double priceLoss = 0.0;          // Stop loss for current trade
-   double priceProfit = 0.0;        // Not used as trading checkpoints on profit
    bool crossUp = false;            // Start openning a position on current tendence
    bool crossDn = false;            // Start openning a position on current tendence
+   double DINAMIC_PROFIT = 0;       // Profit is as great as the markets goes
    
    // Do not open more than one position at a time
    if (PositionsTotal() == 0) {
@@ -134,39 +138,44 @@ void TradeOnMovingAvarageCross(double priceBid, double priceAsk, double shortMov
      
       // Cross up, must cancel short orders and open long orders   
       if (crossUp) {
+      
          if (orderIdSell == 0) {
-            price = _ATTPrice.Sum(priceAsk, points);
+            priceProfit = 0.0;
+            priceDeal = _ATTPrice.Sum(priceAsk, points);
             priceLoss = priceAsk;
-            orderIdBuy = _ATTTrade.Buy(assetCode, contracts, price, priceLoss, priceProfit);
+            priceProfit = _ATTPrice.Sum(priceDeal, points);
+            orderIdBuy = _ATTTrade.Buy(assetCode, contracts, priceDeal, priceLoss, DINAMIC_PROFIT);
          }
       }
    
       // Cross down, must cancel long orders and open short orders   
       if (crossDn) {      
-         if (orderIdBuy == 0) {            
-            price = _ATTPrice.Subtract(priceBid, points);
+         if (orderIdBuy == 0) {        
+            priceProfit = 0.0;         
+            priceDeal = _ATTPrice.Subtract(priceBid, points);
             priceLoss = priceBid;
-            orderIdSell = _ATTTrade.Sell(assetCode, contracts, price, priceLoss, priceProfit);
+            priceProfit = _ATTPrice.Subtract(priceDeal, points);
+            orderIdSell = _ATTTrade.Sell(assetCode, contracts, priceDeal, priceLoss, DINAMIC_PROFIT);
          }
       }
    } else {
    
-      // Handle dinamic stop on buy
-      if (orderIdBuy>0) {
-         if (priceBid > priceLoss) {
-            priceLoss = _ATTPrice.Sum(priceLoss, points);
-            _ATTTrade.ModifyPosition(orderIdBuy, priceLoss, 0.00);
+      // Set take profit as stop loss (duplicate the target)      
+      if (orderIdBuy>0) {            
+         if (priceBid > priceProfit) {
+            priceLoss = priceProfit;
+            _ATTTrade.ModifyPosition(orderIdBuy, priceLoss, DINAMIC_PROFIT);
+            priceProfit = _ATTPrice.Sum(priceProfit, points);
          }
       }
 
-      // Handle dinamic stop on sell      
       if (orderIdSell>0) {
-         if (priceAsk < priceLoss) {
-            priceLoss = _ATTPrice.Subtract(priceLoss, points);
-            _ATTTrade.ModifyPosition(orderIdSell, priceLoss, 0.00);
+         if (priceAsk < priceProfit) {
+            priceLoss = priceProfit;
+            _ATTTrade.ModifyPosition(orderIdBuy, priceLoss, DINAMIC_PROFIT);
+            priceProfit = _ATTPrice.Subtract(priceProfit, points);
          }      
-      }      
-      
+      }
    }
 
 }
