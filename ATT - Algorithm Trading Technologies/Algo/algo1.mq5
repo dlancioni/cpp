@@ -141,9 +141,9 @@ void TradeOnMovingAvarageCross(double priceBid, double priceAsk, double shortMov
          // Cross up, must cancel short orders and open long orders   
          if (crossUp) {         
             if (orderIdSell == 0) {
-               priceDeal = _ATTPrice.Subtract(priceAsk, points);
+               priceDeal = _ATTPrice.Sum(priceAsk, points);
                priceLoss = _ATTPrice.Subtract(priceAsk, points);
-               priceProfit = _ATTPrice.Sum(priceDeal, points);
+               priceProfit = _ATTPrice.Sum(priceDeal, points+10);
                orderIdBuy = _ATTTrade.Buy(assetCode, contracts, priceDeal, priceLoss, DINAMIC_PROFIT);
             }
          }
@@ -151,7 +151,7 @@ void TradeOnMovingAvarageCross(double priceBid, double priceAsk, double shortMov
          // Cross down, must cancel long orders and open short orders   
          if (crossDn) {      
             if (orderIdBuy == 0) {        
-               priceDeal = _ATTPrice.Sum(priceBid, points);
+               priceDeal = _ATTPrice.Subtract(priceBid, points);
                priceLoss = _ATTPrice.Sum(priceBid, points);
                priceProfit = _ATTPrice.Subtract(priceDeal, points);
                orderIdSell = _ATTTrade.Sell(assetCode, contracts, priceDeal, priceLoss, DINAMIC_PROFIT);
@@ -166,7 +166,7 @@ void TradeOnMovingAvarageCross(double priceBid, double priceAsk, double shortMov
       
       // Set take profit as stop loss (duplicate the target)      
       if (orderIdBuy>0) {            
-         if (priceBid > priceProfit) {
+         if (priceAsk > priceProfit) {
             priceLoss = priceProfit;
             priceProfit = _ATTPrice.Sum(priceLoss, points);
             _ATTTrade.ModifyPosition(orderIdBuy, priceLoss, priceProfit);
@@ -175,7 +175,7 @@ void TradeOnMovingAvarageCross(double priceBid, double priceAsk, double shortMov
       }
 
       if (orderIdSell>0) {
-         if (priceAsk < priceProfit) {
+         if (priceBid < priceProfit) {
             priceLoss = priceProfit;
             priceProfit = _ATTPrice.Subtract(priceLoss, points);
             _ATTTrade.ModifyPosition(orderIdSell, priceLoss, priceProfit);
