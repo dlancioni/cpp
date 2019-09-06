@@ -15,5 +15,14 @@
 class ATTSymbol : public CSymbolInfo {
    private:
    public:
+      double Bid();
+      double Ask();   
 };
 
+double ATTSymbol::Bid(void) {
+   return SymbolInfoDouble(Symbol(),SYMBOL_BID);
+}
+
+double ATTSymbol::Ask(void) {
+   return SymbolInfoDouble(Symbol(),SYMBOL_ASK);
+}
