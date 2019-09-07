@@ -59,9 +59,13 @@ void ATTPosition::DinamicStop(ulong _ticketId, double _pointsTrade, double _poin
    double tp = 0.0;
    double bid = 0.0;
    double ask = 0.0;
+   double priceStep = 0.0;
    
    ATTSymbol __ATTSymbol;
    ATTPrice __ATTPrice;
+   
+   
+   //https://www.youtube.com/watch?v=VL1_NGaAOaU
 
    // Query the position
    if (ATTPosition::SelectByTicket(_ticketId)) {   
@@ -73,9 +77,9 @@ void ATTPosition::DinamicStop(ulong _ticketId, double _pointsTrade, double _poin
       bid = __ATTSymbol.Bid();
       ask = __ATTSymbol.Ask();                  
       
-      priceStep = __ATTPrice.Sum(stopPrice, _pointsStep);
+      //priceStep = __ATTPrice.Sum(stopPrice, _pointsStep);
 
-   
+   /*
       // Ajust stop loss as price moves
       if (ATTPosition::PositionType() == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
                
@@ -88,6 +92,8 @@ void ATTPosition::DinamicStop(ulong _ticketId, double _pointsTrade, double _poin
          if (ask < priceTarget) {
             ATTPosition::ModifyPosition(_ticketId, sl, tp);            
          }      
-      }      
+      }  
+      
+      */    
    }
 }      
