@@ -64,13 +64,10 @@ void ATTPosition::TrailingStop() {
    double bid = 0.0;
    double ask = 0.0;
    double pts = 0;
-   ulong type;
+   ulong type = 0.0;
       
    ATTSymbol __ATTSymbol;
    ATTPrice __ATTPrice;
-   
-   // Set default checkpoint value
-   pts = (50 * Point());
    
    // Close open positions
    for (int i=PositionsTotal()-1; i>=0; i--) {   
@@ -85,7 +82,10 @@ void ATTPosition::TrailingStop() {
          tp = PositionGetDouble(POSITION_TP);
          type = PositionGetInteger(POSITION_TYPE);
          bid = __ATTSymbol.Bid();
-         ask = __ATTSymbol.Ask();         
+         ask = __ATTSymbol.Ask();
+         
+         // Set default checkpoint value
+         pts = MathAbs((price - sl) * Point()) / 4;
 
          // Move the stops higher or lowers
          if (type == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
