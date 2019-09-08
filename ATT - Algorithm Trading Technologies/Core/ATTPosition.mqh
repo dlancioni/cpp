@@ -63,7 +63,7 @@ void ATTPosition::TrailingStop() {
    double tp = 0.0;
    double bid = 0.0;
    double ask = 0.0;
-   double pts = 0;
+   double pts = 0.0;
    ulong type = 0.0;
       
    ATTSymbol __ATTSymbol;
