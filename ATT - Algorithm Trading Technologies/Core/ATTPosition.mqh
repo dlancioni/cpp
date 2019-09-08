@@ -2,6 +2,7 @@
 #include "ATTPrice.mqh"
 #include "ATTSymbol.mqh"
 // https://www.mql5.com/pt/docs/standardlibrary/tradeclasses/ctrade
+// https://www.youtube.com/watch?v=VL1_NGaAOaU
 
 //+------------------------------------------------------------------+
 //|                                                     ATTTrade.mqh |
@@ -20,7 +21,7 @@ class ATTPosition : public CPositionInfo {
       bool ModifyPosition(ulong orderId, double sl, double tp);    
    public:
       void CloseAllPositions();
-      void DinamicStop(ulong ticketId, double _pointsTrade,  double pointsLoss, double pointsStep, double priceProfit);
+      void TrailingStop();
 };
 
 //+------------------------------------------------------------------+
@@ -36,7 +37,7 @@ void ATTPosition::CloseAllPositions() {
      for (int i=PositionsTotal()-1; i>=0; i--) {
 	      id = PositionGetTicket(i);
 	      trade.PositionClose(id);
-     }   
+     }
 }
 
 //+------------------------------------------------------------------+
@@ -52,48 +53,57 @@ bool ATTPosition::ModifyPosition(ulong id=0, double sl=0.0, double tp=0.0) {
 //+------------------------------------------------------------------+
 //| Handle dinamic stops                                             |
 //+------------------------------------------------------------------+
-void ATTPosition::DinamicStop(ulong _ticketId, double _pointsTrade, double _pointsLoss, double _pointsStep, double _priceProfit) {
+void ATTPosition::TrailingStop() {
 
+   // General Declaration
+   ulong tid = 0;
+   string symbol = "";
    double price = 0.0;
    double sl = 0.0;
    double tp = 0.0;
    double bid = 0.0;
    double ask = 0.0;
-   double priceStep = 0.0;
-   
+   double pts = 0;
+   ulong type;
+      
    ATTSymbol __ATTSymbol;
    ATTPrice __ATTPrice;
    
+   // Set default checkpoint value
+   pts = (50 * Point());
    
-   //https://www.youtube.com/watch?v=VL1_NGaAOaU
-
-   // Query the position
-   if (ATTPosition::SelectByTicket(_ticketId)) {   
+   // Close open positions
+   for (int i=PositionsTotal()-1; i>=0; i--) {   
    
-      // Get current stop price
-      price = ATTPosition::PriceOpen();
-      sl = ATTPosition::StopLoss();
-      tp = ATTPosition::TakeProfit();
-      bid = __ATTSymbol.Bid();
-      ask = __ATTSymbol.Ask();                  
-      
-      //priceStep = __ATTPrice.Sum(stopPrice, _pointsStep);
+      // Make sure we are at same symbol as chart
+      if (PositionGetSymbol(i) == Symbol()) {
 
-   /*
-      // Ajust stop loss as price moves
-      if (ATTPosition::PositionType() == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
-               
-         if (bid > priceTarget) {
-            ATTPosition::ModifyPosition(_ticketId, sl, tp);            
-         }
-         
-      } else {
-         
-         if (ask < priceTarget) {
-            ATTPosition::ModifyPosition(_ticketId, sl, tp);            
-         }      
-      }  
-      
-      */    
-   }
+         // Get deal info         
+         tid = PositionGetInteger(POSITION_TICKET);
+         price = PositionGetDouble(POSITION_PRICE_OPEN);
+         sl = PositionGetDouble(POSITION_SL);
+         tp = PositionGetDouble(POSITION_TP);
+         type = PositionGetInteger(POSITION_TYPE);
+         bid = __ATTSymbol.Bid();
+         ask = __ATTSymbol.Ask();         
+
+         // Move the stops higher or lowers
+         if (type == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
+            price = __ATTPrice.Sum(bid, pts);
+            if (bid > price) {
+               sl = __ATTPrice.Sum(sl, pts);
+               tp = __ATTPrice.Sum(tp, pts);
+               ATTPosition::ModifyPosition(tid, sl, tp);
+            }            
+         } else {        
+            price = __ATTPrice.Sum(bid, pts);
+            if (ask < price) {
+               sl = __ATTPrice.Subtract(sl, pts);
+               tp = __ATTPrice.Subtract(tp, pts);            
+               ATTPosition::ModifyPosition(tid, sl, tp);
+            }      
+         }        
+      }
+   }   
+
 }      
