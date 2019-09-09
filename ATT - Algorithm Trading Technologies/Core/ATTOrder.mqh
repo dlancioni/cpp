@@ -121,7 +121,9 @@ ulong ATTOrder::CloseAllOrders() {
     // Close open positions
      for (int i=OrdersTotal()-1; i>=0; i--) {
 	      id = OrderGetTicket(i);
-	      trade.OrderDelete(id);
+         if (PositionGetSymbol(i) == Symbol()) {	      
+	         trade.OrderDelete(id);
+	      }
      }
      
      return 0;   
