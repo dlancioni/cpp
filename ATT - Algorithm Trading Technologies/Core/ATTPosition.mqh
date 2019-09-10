@@ -96,16 +96,16 @@ void ATTPosition::TrailingStop() {
             // Move the stops higher or lowers
             if (type == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
                price = __ATTPrice.Sum(sl, pts);
-               //price = __ATTPrice.Sum(price, step);
-               if (bid >= price) {
+               price = __ATTPrice.Sum(price, step);
+               if (bid > price) {
                   sl = __ATTPrice.Sum(sl, step);
                   tp = __ATTPrice.Sum(tp, step);
                   ATTPosition::ModifyPosition(tid, sl, tp);
                }
             } else {        
                price = __ATTPrice.Subtract(sl, pts);
-               //price = __ATTPrice.Subtract(price, step);
-               if (ask <= price) {
+               price = __ATTPrice.Subtract(price, step);
+               if (ask < price) {
                   sl = __ATTPrice.Subtract(sl, step);
                   tp = __ATTPrice.Subtract(tp, step);            
                   ATTPosition::ModifyPosition(tid, sl, tp);
