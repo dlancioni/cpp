@@ -73,40 +73,45 @@ void ATTPosition::TrailingStop() {
    
    // Close open positions
    for (int i=PositionsTotal()-1; i>=0; i--) {   
+
+      // Get current deal
+      if (SelectByIndex(i)) {
    
-      // Make sure we are at same symbol as chart
-      if (PositionGetSymbol(i) == Symbol()) {
-
-         // Get deal info         
-         tid = PositionGetInteger(POSITION_TICKET);
-         po = PositionGetDouble(POSITION_PRICE_OPEN);
-         sl = PositionGetDouble(POSITION_SL);
-         tp = PositionGetDouble(POSITION_TP);
-         type = PositionGetInteger(POSITION_TYPE);
-         bid = __ATTSymbol.Bid();
-         ask = __ATTSymbol.Ask();
-         
-         // Set default checkpoint value
-         pts = MathAbs(((tp - po) * Point()));
-         step = MathAbs(pts/4);
-
-         // Move the stops higher or lowers
-         if (type == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
-            price = __ATTPrice.Sum(sl+pts,step);
-            if (bid > price) {
-               sl = __ATTPrice.Sum(sl, step);
-               tp = __ATTPrice.Sum(tp, step);
-               ATTPosition::ModifyPosition(tid, sl, tp);
-            }
-         } else {        
-            price = __ATTPrice.Subtract(sl-pts, step);
-            if (ask < price) {
-               sl = __ATTPrice.Subtract(sl, step);
-               tp = __ATTPrice.Subtract(tp, step);            
-               ATTPosition::ModifyPosition(tid, sl, tp);
-            }      
-         }        
+         // Make sure we are at same symbol as chart
+         if (PositionGetSymbol(i) == Symbol()) {
+   
+            // Get deal info         
+            tid = PositionGetInteger(POSITION_TICKET);
+            po = PositionGetDouble(POSITION_PRICE_OPEN);
+            sl = PositionGetDouble(POSITION_SL);
+            tp = PositionGetDouble(POSITION_TP);
+            type = PositionGetInteger(POSITION_TYPE);
+            bid = __ATTSymbol.Bid();
+            ask = __ATTSymbol.Ask();
+            
+            // Set default checkpoint value
+            pts = MathAbs(((sl - po) * Point()));
+            step = MathAbs(pts/4);
+   
+            // Move the stops higher or lowers
+            if (type == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
+               price = __ATTPrice.Sum(sl, pts);
+               price = __ATTPrice.Sum(price, step);
+               if (bid > price) {
+                  sl = __ATTPrice.Sum(sl, step);
+                  tp = __ATTPrice.Sum(tp, step);
+                  ATTPosition::ModifyPosition(tid, sl, tp);
+               }
+            } else {        
+               price = __ATTPrice.Subtract(sl, pts);
+               price = __ATTPrice.Subtract(price, step);
+               if (ask < price) {
+                  sl = __ATTPrice.Subtract(sl, step);
+                  tp = __ATTPrice.Subtract(tp, step);            
+                  ATTPosition::ModifyPosition(tid, sl, tp);
+               }      
+            }        
+         }
       }
-   }   
-
+   }
 }      
