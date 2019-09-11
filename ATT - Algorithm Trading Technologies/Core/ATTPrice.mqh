@@ -16,6 +16,7 @@ class ATTPrice {
        double Sum(double value, double pts);
        double Subtract(double value, double pts);
        double GetPoints(double price1, double price2);
+       double GetAverage(double price1, double price2);
 };
 
 //+------------------------------------------------------------------+
@@ -81,5 +82,12 @@ double ATTPrice::GetPoints(double price1, double price2) {
    value = NormalizeDouble(value, Digits());
    
    // Just return
+   return value;
+}
+
+double ATTPrice::GetAverage(double price1, double price2) {
+   double value = 0.0;
+   value = (price1 + price2) / 2;  
+   value = NormalizeDouble(value, Digits());   
    return value;
 }
