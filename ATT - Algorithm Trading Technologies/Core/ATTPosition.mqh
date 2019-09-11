@@ -104,7 +104,7 @@ void ATTPosition::TrailingStop() {
             
             // Set default checkpoint value
             pts = __ATTPrice.GetPoints(sl, po);
-            step = MathAbs(pts/4);
+            step = MathAbs(pts/5);
 
             // Move the stops higher or lowers
             if (type == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
