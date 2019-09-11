@@ -15,6 +15,7 @@ class ATTPrice {
    public:
        double Sum(double value, double pts);
        double Subtract(double value, double pts);
+       double GetPoints(double price1, double price2);
 };
 
 //+------------------------------------------------------------------+
@@ -35,7 +36,7 @@ double ATTPrice::Sum(double price=0.0, double pts=0.0) {
       while (MathMod(value, tickSize) > 0) {
          value = NormalizeDouble(value + Point(), Digits());
       }              
-   }
+   }  
    
    // Just return
    return value;
@@ -57,6 +58,27 @@ double ATTPrice::Subtract(double price=0.0, double pts=0.0) {
          value = NormalizeDouble(value - Point(), Digits());
       }
    }
+   
+   // Just return
+   return value;
+}
+
+double ATTPrice::GetPoints(double price1, double price2) {
+
+   // General declaration   
+   double value = 0.0;
+   ulong digits = SymbolInfoInteger(Symbol(), SYMBOL_DIGITS);
+
+   // Normalize the final value according to the tick size   
+   if (digits == 0) {
+      value = MathAbs(price1 - price2) * Point();
+   }
+   
+   if (digits == 5) {
+      value = MathAbs(price1 - price2) / Point();
+   }   
+   
+   value = NormalizeDouble(value, Digits());
    
    // Just return
    return value;

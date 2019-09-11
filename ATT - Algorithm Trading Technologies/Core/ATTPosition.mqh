@@ -90,9 +90,9 @@ void ATTPosition::TrailingStop() {
             ask = __ATTSymbol.Ask();
             
             // Set default checkpoint value
-            pts = MathAbs(((sl - po) * Point()));
+            pts = __ATTPrice.GetPoints(sl, po);
             step = MathAbs(pts/4);
-   
+
             // Move the stops higher or lowers
             if (type == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
                price = __ATTPrice.Sum(sl, pts);
