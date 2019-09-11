@@ -20,9 +20,22 @@ class ATTPosition : public CPositionInfo {
    private:
       bool ModifyPosition(ulong orderId, double sl, double tp);    
    public:
+      ATTPosition();
+      ~ATTPosition();
+      double checkpoint;   
       void CloseAllPositions();
       void TrailingStop();
 };
+
+//+------------------------------------------------------------------+
+//| Constructor/Destructor                                        |
+//+------------------------------------------------------------------+
+ATTPosition::ATTPosition() {
+   ATTPosition::checkpoint = 0.0;
+}
+ATTPosition::~ATTPosition() {
+   ATTPosition::checkpoint = 0.0;
+}
 
 //+------------------------------------------------------------------+
 //| Delete all pending orders                                        |
@@ -95,21 +108,48 @@ void ATTPosition::TrailingStop() {
 
             // Move the stops higher or lowers
             if (type == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
+            
+               // Recalculate the prices
                price = __ATTPrice.Sum(sl, pts);
                price = __ATTPrice.Sum(price, step);
+               
+               // Increase the stops when price goes up
                if (bid > price) {
                   sl = __ATTPrice.Sum(sl, step);
                   tp = __ATTPrice.Sum(tp, step);
-                  ATTPosition::ModifyPosition(tid, sl, tp);
+                  ATTPosition::checkpoint = tp;
+                  ATTPosition::ModifyPosition(tid, sl, tp);                 
                }
-            } else {        
+               
+               // Close positions if price gets smaller than checkpoint               
+               if (ATTPosition::checkpoint > 0) {
+                  if (bid < ATTPosition::checkpoint) {
+                     ATTPosition::CloseAllPositions();
+                     ATTPosition::checkpoint = 0.0;
+                  }
+               }
+
+            } else {
+            
+               // Recalculate the prices            
                price = __ATTPrice.Subtract(sl, pts);
                price = __ATTPrice.Subtract(price, step);
+               
+               // Decrease the stops when price goes down
                if (ask < price) {
                   sl = __ATTPrice.Subtract(sl, step);
-                  tp = __ATTPrice.Subtract(tp, step);            
+                  tp = __ATTPrice.Subtract(tp, step);
+                  ATTPosition::checkpoint = tp;                  
                   ATTPosition::ModifyPosition(tid, sl, tp);
-               }      
+               }
+               
+               // Close positions if price gets greater than checkpoint               
+               if (ATTPosition::checkpoint > 0) {
+                  if (ask > ATTPosition::checkpoint) {
+                     ATTPosition::CloseAllPositions();
+                     ATTPosition::checkpoint = 0.0;
+                  }
+               }               
             }        
          }
       }
