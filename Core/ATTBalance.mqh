@@ -46,6 +46,7 @@ void ATTBalance::IsResultOverLimits(double ib, double loss, double profit) {
    bool flag = false;
    double result = 0.0;
    double equity = 0.0;
+   ATTPosition _ATTPosition;
 
    // Calculate current result
    equity = ATTBalance::GetEquity();   

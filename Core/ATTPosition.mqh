@@ -69,20 +69,16 @@ bool ATTPosition::ModifyPosition(ulong id=0, double sl=0.0, double tp=0.0) {
 void ATTPosition::TrailingStop() {
 
    // General Declaration
-   ulong tid = 0;
-   string symbol = "";
-   double price = 0.0;
-   double po = 0.0;
-   double sl = 0.0;
-   double tp = 0.0;
-   double bid = 0.0;
-   double ask = 0.0;
-   double pts = 0.0;
-   ulong type = 0.0;
-   double step = 0.0;
+   ulong ticketId = 0;
+   double priceDeal = 0.0;
+   double stopLoss = 0.0;
+   double takeProfit = 0.0;
+   ulong dealType = 0.0;
+   double pointsStep = 0.0;
+   double pointsTrade = 0.0;
       
-   ATTSymbol __ATTSymbol;
-   ATTPrice __ATTPrice;
+   ATTSymbol _ATTSymbol;
+   ATTPrice _ATTPrice;
    
    // Close open positions
    for (int i=PositionsTotal()-1; i>=0; i--) {   
@@ -92,65 +88,47 @@ void ATTPosition::TrailingStop() {
    
          // Make sure we are at same symbol as chart
          if (PositionGetSymbol(i) == Symbol()) {
-   
-            // Get deal info         
-            tid = PositionGetInteger(POSITION_TICKET);
-            po = PositionGetDouble(POSITION_PRICE_OPEN);
-            sl = PositionGetDouble(POSITION_SL);
-            tp = PositionGetDouble(POSITION_TP);
-            type = PositionGetInteger(POSITION_TYPE);
-            bid = __ATTSymbol.Bid();
-            ask = __ATTSymbol.Ask();
-            
+
+            // Get deal info
+            ticketId = PositionGetInteger(POSITION_TICKET);
+            priceDeal = PositionGetDouble(POSITION_PRICE_OPEN);
+            stopLoss = PositionGetDouble(POSITION_SL);
+            takeProfit = PositionGetDouble(POSITION_TP);
+            dealType = PositionGetInteger(POSITION_TYPE);
+
             // Set default checkpoint value
-            pts = __ATTPrice.GetPoints(sl, po);
-            step = MathAbs(pts/5);
+            pointsTrade = _ATTPrice.GetPoints(stopLoss, takeProfit);
+            pointsStep = MathAbs(pointsTrade/5);
 
             // Move the stops higher or lowers
-            if (type == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
+            if (dealType == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
             
-               // Recalculate the prices
-               price = __ATTPrice.Sum(sl, pts);
-               price = __ATTPrice.Sum(price, step);
-               
-               // Increase the stops when price goes up
-               if (bid > price) {
-                  sl = __ATTPrice.Sum(sl, step);
-                  tp = __ATTPrice.Sum(tp, step);
-                  ATTPosition::checkpoint = tp;
-                  ATTPosition::ModifyPosition(tid, sl, tp);                 
-               }
-               
-               // Close positions if price gets smaller than checkpoint               
-               if (ATTPosition::checkpoint > 0) {
-                  if (bid < ATTPosition::checkpoint) {
-                     ATTPosition::CloseAllPositions();
-                     ATTPosition::checkpoint = 0.0;
+               // Decrease stop loss
+               if (stopLoss < priceDeal) {
+                  if (_ATTSymbol.Bid() > _ATTPrice.Sum(stopLoss, (pointsTrade + pointsStep))) {
+                     ATTPosition::ModifyPosition(ticketId, _ATTPrice.Sum(stopLoss, pointsStep), takeProfit);
                   }
                }
-
+               
+               // Increase take profit (not used yet)
+               if (_ATTSymbol.Bid() > _ATTPrice.Sum(takeProfit, pointsStep)) {
+                  ATTPosition::checkpoint = _ATTSymbol.Bid();
+               }
+               
             } else {
-            
-               // Recalculate the prices            
-               price = __ATTPrice.Subtract(sl, pts);
-               price = __ATTPrice.Subtract(price, step);
-               
-               // Decrease the stops when price goes down
-               if (ask < price) {
-                  sl = __ATTPrice.Subtract(sl, step);
-                  tp = __ATTPrice.Subtract(tp, step);
-                  ATTPosition::checkpoint = tp;                  
-                  ATTPosition::ModifyPosition(tid, sl, tp);
+                        
+               // Decrease stop loss            
+               if (stopLoss > priceDeal) {
+                  if (_ATTSymbol.Ask() < _ATTPrice.Subtract(stopLoss, (pointsTrade + pointsStep))) {
+                     ATTPosition::ModifyPosition(ticketId,  _ATTPrice.Subtract(stopLoss, pointsStep), takeProfit);
+                  }               
                }
                
-               // Close positions if price gets greater than checkpoint               
-               if (ATTPosition::checkpoint > 0) {
-                  if (ask > ATTPosition::checkpoint) {
-                     ATTPosition::CloseAllPositions();
-                     ATTPosition::checkpoint = 0.0;
-                  }
-               }               
-            }        
+               // Increase take profit (not used yet)
+               if (_ATTSymbol.Ask() < _ATTPrice.Subtract(takeProfit, pointsStep)) {
+                  ATTPosition::checkpoint = _ATTSymbol.Bid();
+               }
+            }
          }
       }
    }
