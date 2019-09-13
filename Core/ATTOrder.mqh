@@ -21,7 +21,8 @@ class ATTOrder : public CTrade {
      
    public:  
        ulong Buy(_ORDER_TYPE type, const string symbol, double qtt, double price, double sl, double tp);
-       ulong Sell(_ORDER_TYPE type, const string symbol, double qtt, double price, double sl, double tp);
+       ulong Sell(_ORDER_TYPE type, const string symbol, double qtt, double price, double sl, double tp);       
+       bool AmmendOrder(ulong ticket, double price, double sl, double tp);
 
        ulong CloseAllOrders();
        ulong OrderCount(string _symbol);
@@ -93,6 +94,15 @@ ulong ATTOrder::Order(_ORDER_TYPE type, const string bs, const string symbol=NUL
    // Return ticket id or zeros
    return tid;
 }
+
+//+------------------------------------------------------------------+
+//| Modify existing order                                            |
+//+------------------------------------------------------------------+
+bool ATTOrder::AmmendOrder(ulong ticket, double price, double sl, double tp) {
+   CTrade trade;
+   return trade.OrderModify(ticket, price, sl, tp, 0, 0, 0);
+}
+
 
 //+------------------------------------------------------------------+
 //| Close all open orders                                            |
