@@ -27,7 +27,7 @@ class ATTValidator {
 //+------------------------------------------------------------------+
 //| Validate all input parameter                                     |
 //+------------------------------------------------------------------+
-string ATTValidator::ValidateParameters(double amount, double pointsToTrade, double stopLoss, double takeProfit, _TRAIL_STOP trailStop, double loss, double profit) {
+string ATTValidator::ValidateParameters(double amount, double pointsToTrade, double pointsLoss, double pointsProfit, _TRAIL_STOP trailStop, double loss, double profit) {
    
    string value = "";
    
@@ -38,7 +38,7 @@ string ATTValidator::ValidateParameters(double amount, double pointsToTrade, dou
    value = ATTValidator::ValidatePointsToTrade(pointsToTrade);
   
    // Validate the stops
-   value = ATTValidator::ValidateStops(trailStop, stopLoss, takeProfit);
+   value = ATTValidator::ValidateStops(trailStop, pointsLoss, pointsProfit);
    
    return value;
 }
@@ -75,19 +75,19 @@ string ATTValidator::ValidatePointsToTrade(double pointsToTrade) {
 //+------------------------------------------------------------------+
 //| Validate the stops                                               |
 //+------------------------------------------------------------------+
-string ATTValidator::ValidateStops(_TRAIL_STOP trailStop, double stopLoss, double takeProfit) {
+string ATTValidator::ValidateStops(_TRAIL_STOP trailStop, double pointsLoss, double pointsProfit) {
 
    string value = "";
       
-   if (stopLoss <= 0)
+   if (pointsLoss <= 0)
       value = "StopLoss is mandatory";
       
-   if (takeProfit < 0)
+   if (pointsProfit < 0)
       value = "TakeProfit cannot be negative";
       
    if (trailStop == _TRAIL_STOP::PROFIT || trailStop == _TRAIL_STOP::BOTH) {
-      if (takeProfit > stopLoss) {
-         value = "Trailing stop profit is selected, take profit value must be smaller than stop loss";
+      if (pointsProfit > pointsLoss) {
+         value = "Trailing stop profit is selected, points loss must be greater than points profit";
       }
    }
 
