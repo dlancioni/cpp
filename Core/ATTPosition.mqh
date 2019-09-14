@@ -24,7 +24,8 @@ class ATTPosition : public CPositionInfo {
    public:
       ATTPosition();
       ~ATTPosition();
-      ulong ticketTrailing;   
+      ulong ticketTrail;
+      double checkpointPrice;
       void CloseAllPositions();
       void TrailStop(bool trailStopLoss, bool trailStopProfit);
 };
@@ -33,10 +34,12 @@ class ATTPosition : public CPositionInfo {
 //| Constructor/Destructor                                        |
 //+------------------------------------------------------------------+
 ATTPosition::ATTPosition() {
-   ATTPosition::ticketTrailing = 0;
+   ATTPosition::ticketTrail = 0;
+   ATTPosition::checkpointPrice = 0.0;
 }
 ATTPosition::~ATTPosition() {
-   ATTPosition::ticketTrailing = 0;
+   ATTPosition::ticketTrail = 0;
+   ATTPosition::checkpointPrice = 0.0;   
 }
 
 //+------------------------------------------------------------------+
