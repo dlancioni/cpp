@@ -85,7 +85,7 @@ ulong ATTOrder::Order(_ORDER_TYPE type, const string bs, const string symbol=NUL
 
       // Check trading action
       if (result) {
-         if (ATTOrder::ResultRetcode()==TRADE_RETCODE_DONE) {   
+         if (ATTOrder::ResultRetcode() == TRADE_RETCODE_DONE) {   
             tid = ATTOrder::ResultOrder();
          }
       }
