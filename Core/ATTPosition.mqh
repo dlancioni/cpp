@@ -26,7 +26,7 @@ class ATTPosition : public CPositionInfo {
       ~ATTPosition();
       ulong ticketTrailing;   
       void CloseAllPositions();
-      void TrailingStop(double _contracts, double trailingPoints);
+      void TrailingStop();
 };
 
 //+------------------------------------------------------------------+
@@ -68,7 +68,7 @@ bool ATTPosition::ModifyPosition(ulong id=0, double sl=0.0, double tp=0.0) {
 //+------------------------------------------------------------------+
 //| Handle dinamic stops                                             |
 //+------------------------------------------------------------------+
-void ATTPosition::TrailingStop(double contracts = 0, double trailingPoints = 0) {
+void ATTPosition::TrailingStop() {
 
    // General Declaration
    ulong ticketId = 0;
@@ -77,6 +77,8 @@ void ATTPosition::TrailingStop(double contracts = 0, double trailingPoints = 0) 
    double takeProfit = 0.0;
    ulong dealType = 0.0;
    double pointsTrade = 0.0;
+   double contracts = 0.0;
+   double trailingPoints = 0.0;
       
    ATTSymbol _ATTSymbol;
    ATTPrice _ATTPrice;
@@ -97,6 +99,7 @@ void ATTPosition::TrailingStop(double contracts = 0, double trailingPoints = 0) 
             stopLoss = PositionGetDouble(POSITION_SL);
             takeProfit = PositionGetDouble(POSITION_TP);
             dealType = PositionGetInteger(POSITION_TYPE);
+            contracts = PositionGetDouble(POSITION_VOLUME);
 
             // Set default checkpoint value
             pointsTrade = MathAbs(_ATTPrice.GetPoints(stopLoss, priceDeal));
@@ -107,19 +110,8 @@ void ATTPosition::TrailingStop(double contracts = 0, double trailingPoints = 0) 
                // Decrease stop loss
                if (stopLoss < priceDeal) {
                   if (_ATTSymbol.Bid() > _ATTPrice.Sum(stopLoss, (pointsTrade + trailingPoints))) {
-                     ATTPosition::ModifyPosition(ticketId, _ATTPrice.Sum(stopLoss, trailingPoints), takeProfit);
+                     ATTPosition::ModifyPosition(ticketId, _ATTPrice.Sum(stopLoss, trailingPoints), _ATTPrice.Sum(takeProfit, trailingPoints));
                   }
-               }
-               
-               // Increase profit after 50% profit
-               if (_ATTSymbol.Bid() > _ATTPrice.Sum(takeProfit/2, trailingPoints)) {
-                  if (ATTPosition::ticketTrailing == 0) {
-                     ATTPosition::ticketTrailing = _ATTOrder.Sell(_ORDER_TYPE::LIMIT, Symbol(), contracts, _ATTSymbol.Bid(), 0, 0);
-                  } else {
-                     if (!_ATTOrder.AmmendOrder(ATTPosition::ticketTrailing, _ATTSymbol.Bid(), 0, 0)) {
-                        ATTPosition::CloseAllPositions();
-                     }
-                  }   
                }
 
             } else {
@@ -127,9 +119,19 @@ void ATTPosition::TrailingStop(double contracts = 0, double trailingPoints = 0) 
                // Decrease stop loss            
                if (stopLoss > priceDeal) {
                   if (_ATTSymbol.Ask() < _ATTPrice.Subtract(stopLoss, (pointsTrade + trailingPoints))) {
-                     ATTPosition::ModifyPosition(ticketId, _ATTPrice.Subtract(stopLoss, trailingPoints), takeProfit);
+                     ATTPosition::ModifyPosition(ticketId, _ATTPrice.Subtract(stopLoss, trailingPoints), _ATTPrice.Subtract(takeProfit, trailingPoints));
                   }               
                }
+            }
+         }
+      }
+   }
+}      
+
+
+
+
+/*
                
                // Decrease profit after 50% profit
                if (_ATTSymbol.Ask() < _ATTPrice.Subtract(takeProfit/2, trailingPoints)) {
@@ -141,8 +143,4 @@ void ATTPosition::TrailingStop(double contracts = 0, double trailingPoints = 0) 
                      }
                   }
                }
-            }
-         }
-      }
-   }
-}      
+*/               
