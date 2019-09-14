@@ -15,12 +15,38 @@
 //+------------------------------------------------------------------+
 class ATTValidator {
    private:
+      string ValidateAmount(double);
+      string ValidatePointsToTrade(double);
+      string ValidateStops(_TRAIL_STOP, double, double);
+      string ValidateDailyLimits(double, double);      
    public:
-      string validateAmount(double);
-      string validateStops(_TRAIL_STOP, double, double);  
+      string ValidateParameters(double, double, double, double, _TRAIL_STOP, double, double);   
+
 };
 
-string ATTValidator::validateAmount(double amount) {
+//+------------------------------------------------------------------+
+//| Validate all input parameter                                     |
+//+------------------------------------------------------------------+
+string ATTValidator::ValidateParameters(double amount, double pointsToTrade, double stopLoss, double takeProfit, _TRAIL_STOP trailStop, double loss, double profit) {
+   
+   string value = "";
+   
+   // Validate the ammount
+   value = ATTValidator::ValidateAmount(amount);
+
+   // Validate the ammount
+   value = ATTValidator::ValidatePointsToTrade(pointsToTrade);
+  
+   // Validate the stops
+   value = ATTValidator::ValidateStops(trailStop, stopLoss, takeProfit);
+   
+   return value;
+}
+
+//+------------------------------------------------------------------+
+//| Validate the amount                                              |
+//+------------------------------------------------------------------+
+string ATTValidator::ValidateAmount(double amount) {
 
    string value = "";
    
@@ -33,6 +59,53 @@ string ATTValidator::validateAmount(double amount) {
    return value;
 }
 
-string ATTValidator::validateStops(_TRAIL_STOP trailStop, double stopLoss, double takeProfit) {
-   return "";
+//+------------------------------------------------------------------+
+//| Validate the amount                                              |
+//+------------------------------------------------------------------+
+string ATTValidator::ValidatePointsToTrade(double pointsToTrade) {
+
+   string value = "";
+      
+   if (pointsToTrade < 0)
+      value = "Points to trade cannot be negative";
+
+   return value;
+}
+
+//+------------------------------------------------------------------+
+//| Validate the stops                                               |
+//+------------------------------------------------------------------+
+string ATTValidator::ValidateStops(_TRAIL_STOP trailStop, double stopLoss, double takeProfit) {
+
+   string value = "";
+      
+   if (stopLoss <= 0)
+      value = "StopLoss is mandatory";
+      
+   if (takeProfit < 0)
+      value = "TakeProfit cannot be negative";
+      
+   if (trailStop == _TRAIL_STOP::PROFIT || trailStop == _TRAIL_STOP::BOTH) {
+      if (takeProfit > stopLoss) {
+         value = "Trailing stop profit is selected, take profit value must be smaller than stop loss";
+      }
+   }
+
+   return value;
+}
+
+//+------------------------------------------------------------------+
+//| Validate the stops                                               |
+//+------------------------------------------------------------------+
+string ATTValidator::ValidateDailyLimits(double loss, double profit) {
+
+   string value = "";
+      
+   if (loss <= 0)
+      value = "Daily loss value is mandatory";
+      
+   if (profit <= 0)
+      value = "Daily profit value is mandatory";
+
+   return value;
 }
