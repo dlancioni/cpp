@@ -17,17 +17,17 @@ class ATTValidator {
    private:
       string ValidateAmount(double);
       string ValidatePointsToTrade(double);
-      string ValidateStops(_TRAIL_STOP, double, double);
+      string ValidateStops(double, double, double);
       string ValidateDailyLimits(double, double);      
    public:
-      string ValidateParameters(double, double, double, double, _TRAIL_STOP, double, double);   
+      string ValidateParameters(double, double, double, double, double, double, double);   
 
 };
 
 //+------------------------------------------------------------------+
 //| Validate all input parameter                                     |
 //+------------------------------------------------------------------+
-string ATTValidator::ValidateParameters(double amount, double pointsToTrade, double pointsLoss, double pointsProfit, _TRAIL_STOP trailStop, double loss, double profit) {
+string ATTValidator::ValidateParameters(double amount, double pointsToTrade, double pointsLoss, double pointsProfit, double trailingLoss, double tralingProfit, double tralingProfitStep) {
    
    string value = "";
    
@@ -38,7 +38,7 @@ string ATTValidator::ValidateParameters(double amount, double pointsToTrade, dou
    value = ATTValidator::ValidatePointsToTrade(pointsToTrade);
   
    // Validate the stops
-   value = ATTValidator::ValidateStops(trailStop, pointsLoss, pointsProfit);
+   value = ATTValidator::ValidateStops(trailingLoss, tralingProfit, tralingProfitStep);
    
    return value;
 }
@@ -75,22 +75,22 @@ string ATTValidator::ValidatePointsToTrade(double pointsToTrade) {
 //+------------------------------------------------------------------+
 //| Validate the stops                                               |
 //+------------------------------------------------------------------+
-string ATTValidator::ValidateStops(_TRAIL_STOP trailStop, double pointsLoss, double pointsProfit) {
+string ATTValidator::ValidateStops(double trailingLoss, double tralingProfit, double tralingProfitStep) {
 
    string value = "";
       
-   if (pointsLoss <= 0)
-      value = "StopLoss is mandatory";
-      
-   if (pointsProfit < 0)
-      value = "TakeProfit is mandatory";
-      
-   if (trailStop == _TRAIL_STOP::PROFIT || trailStop == _TRAIL_STOP::BOTH) {
-      if (pointsProfit > 0) {
-         if (pointsProfit < (pointsLoss * 3)) {
-            value = "Trailing stop profit is selected, points profit must be at least 3 x greater than points loss or zero for unlimited profit";
-         }
-      }
+   if (trailingLoss < 0) {
+      value = "Points stop loss is mandatory";
+   }
+
+   if (tralingProfit > 0) {
+      if (tralingProfitStep >= 0) {
+         value = "TakeProfit is mandatory";
+      }      
+   }
+   
+   if (tralingProfitStep > tralingProfit)    {
+         value = "Trailing profit step cannot be greater than trailing stop";   
    }
 
    return value;

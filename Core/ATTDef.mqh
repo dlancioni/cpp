@@ -20,10 +20,3 @@ enum _ORDER_POSITION {
    BUY,
    SELL
 };
-
-enum _TRAIL_STOP {
-   NONE,
-   LOSS,
-   PROFIT,
-   BOTH
-};

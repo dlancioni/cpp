@@ -26,7 +26,7 @@ class ATTPosition : public CPositionInfo {
       ~ATTPosition();
       double trailingPrice;
       void CloseAllPositions();
-      void TrailStop(_TRAIL_STOP trailStop);
+      void TrailStop(double, double, double);
 };
 
 //+------------------------------------------------------------------+
@@ -66,7 +66,7 @@ bool ATTPosition::ModifyPosition(ulong id=0, double sl=0.0, double tp=0.0) {
 //+------------------------------------------------------------------+
 //| Handle dinamic stops                                             |
 //+------------------------------------------------------------------+
-void ATTPosition::TrailStop(_TRAIL_STOP trailStop) {
+void ATTPosition::TrailStop(double trailingLoss, double tralingProfit, double tralingProfitStep) {
 
    // General Declaration
    double bid = 0.0;
@@ -106,11 +106,11 @@ void ATTPosition::TrailStop(_TRAIL_STOP trailStop) {
             bid = _ATTSymbol.Bid();
             ask = _ATTSymbol.Ask();
 
-            // Dinamic stop loss
-            if (trailStop == _TRAIL_STOP::LOSS || trailStop == _TRAIL_STOP::BOTH) {
+            // Dinamic stop loss, zero means no trailing
+            if (trailingLoss > 0) {
             
                // Define points to trail stop loss
-               pointsLoss = MathAbs(_ATTPrice.GetPoints(stopLoss, priceDeal));
+               pointsLoss = trailingLoss;
                points = (pointsLoss / 4);
             
                if (dealType == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
@@ -128,8 +128,8 @@ void ATTPosition::TrailStop(_TRAIL_STOP trailStop) {
                }
             }
 
-            // Define points to trail stop loss
-            if (trailStop == _TRAIL_STOP::PROFIT || trailStop == _TRAIL_STOP::BOTH) {
+            // Define points to trail stop profit, zero means no trailing
+            if (tralingProfit > 0 && tralingProfitStep > 0) {
                if (dealType == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
                   if (bid > trailingPrice) {
                      trailingPrice = bid;
@@ -138,8 +138,9 @@ void ATTPosition::TrailStop(_TRAIL_STOP trailStop) {
                   if (ask < trailingPrice) {
                      trailingPrice = bid;
                   }
-               }          
-            }  
+               }
+            }
+         //
          }
       }
    }
