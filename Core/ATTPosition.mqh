@@ -124,26 +124,36 @@ void ATTPosition::TrailStop(double pointsLoss, double trailingLoss, double trail
             }
 
             // Define points to trail stop profit, zero means no trailing
-            if (trailingProfit > 0 && trailingProfitStep > 0) {
+            if (trailingProfit > 0 && trailingProfitStep > 0) {           
                if (dealType == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
+                  // First interaction
+                  if (level1 == 0 && level2 == 0) {
+                     level1 = priceDeal;
+                     level2 = _ATTPrice.Subtract(bid, trailingProfitStep);
+                  }
                   // Accumulate level 1 as price goes up
                   if (bid > _ATTPrice.Sum(priceDeal, trailingProfit)) {
                      level1 = bid;
                      level2 = _ATTPrice.Subtract(bid, trailingProfitStep);
                   }
                   // if prices get back, close positions
-                  if (bid < level2 && level2 > priceDeal) {
+                  if (bid <= level2 && level2 > priceDeal) {
                      ATTPosition::CloseAllPositions();
                      Print("BUY: Didn't touch stop profit and get back: ", ticketId);
                   }
                } else {
+                  // First interaction
+                  if (level1 == 0 && level2 == 0) {
+                     level1 = priceDeal;
+                     level2 = _ATTPrice.Sum(ask, trailingProfitStep);
+                  }               
                   // Accumulate level 1 as price goes down
                   if (ask < _ATTPrice.Subtract(priceDeal, trailingProfit)) {
                      level1 = ask;
                      level2 = _ATTPrice.Sum(ask, trailingProfitStep);
                   }
                   // if prices get back, close positions
-                  if (ask > level2 && level2 < priceDeal) {
+                  if (ask >= level2 && level2 < priceDeal) {
                      ATTPosition::CloseAllPositions();
                      Print("SELL: Didn't touch stop profit and get back: ", ticketId);
                   }
