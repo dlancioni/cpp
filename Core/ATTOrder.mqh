@@ -17,31 +17,31 @@
 //+------------------------------------------------------------------+
 class ATTOrder : public CTrade {
    private:
-       ulong Order(_ORDER_TYPE type, const string bs, const string symbol, double qtt, double price, double sl, double tp);
+       ulong Order(_ORDER_TYPE type, string, string, double, double, double, double, ENUM_ORDER_TYPE_TIME, datetime);
      
    public:  
-       ulong Buy(_ORDER_TYPE type, const string symbol, double qtt, double price, double sl, double tp);
-       ulong Sell(_ORDER_TYPE type, const string symbol, double qtt, double price, double sl, double tp);       
-       bool AmmendOrder(ulong ticket, double price, double sl, double tp);
+       ulong Buy(_ORDER_TYPE , string, double, double, double, double, ENUM_ORDER_TYPE_TIME, datetime);
+       ulong Sell(_ORDER_TYPE , string, double, double, double, double, ENUM_ORDER_TYPE_TIME, datetime);
+       bool AmmendOrder(ulong , double, double, double);
 
        ulong CloseAllOrders();
-       ulong OrderCount(string _symbol);
+       ulong OrderCount(string);
 };
 
 //+------------------------------------------------------------------+
 //| Open or close position at market price                           |
 //+------------------------------------------------------------------+
-ulong ATTOrder::Buy(_ORDER_TYPE type, const string symbol=NULL, double qtt=0.0, double price=0.0, double sl=0.0, double tp=0.0) {
-   return ATTOrder::Order(type, "BUY", symbol, qtt, price, sl, tp);
+ulong ATTOrder::Buy(_ORDER_TYPE type, const string symbol=NULL, double qtt=0.0, double price=0.0, double sl=0.0, double tp=0.0, ENUM_ORDER_TYPE_TIME expireType=ORDER_TIME_GTC, datetime expireTime=0) {
+   return ATTOrder::Order(type, "BUY", symbol, qtt, price, sl, tp, expireType, expireTime);
 }
-ulong ATTOrder::Sell(_ORDER_TYPE type, const string symbol=NULL, double qtt=0.0, double price=0.0, double sl=0.0, double tp=0.0) {
-   return ATTOrder::Order(type, "SELL", symbol, qtt, price, sl, tp);
+ulong ATTOrder::Sell(_ORDER_TYPE type, const string symbol=NULL, double qtt=0.0, double price=0.0, double sl=0.0, double tp=0.0, ENUM_ORDER_TYPE_TIME expireType=ORDER_TIME_GTC, datetime expireTime=0) {
+   return ATTOrder::Order(type, "SELL", symbol, qtt, price, sl, tp, expireType, expireTime);
 }
 
 //+------------------------------------------------------------------+
 //| Core logic to open and close positions at market price           |
 //+------------------------------------------------------------------+
-ulong ATTOrder::Order(_ORDER_TYPE type, const string bs, const string symbol=NULL, double qtt=0.0, double price=0.0, double sl=0.0, double tp=0.0) {
+ulong ATTOrder::Order(_ORDER_TYPE type, const string bs, const string symbol=NULL, double qtt=0.0, double price=0.0, double sl=0.0, double tp=0.0, ENUM_ORDER_TYPE_TIME expireType=ORDER_TIME_GTC, datetime expireTime=0) {
 
    // General Declaration
    bool result = false;
@@ -52,23 +52,26 @@ ulong ATTOrder::Order(_ORDER_TYPE type, const string bs, const string symbol=NUL
    // Trade when 1(buy) or 2(Sell), otherwise reteurn zero  
    if (bs=="BUY" || bs=="SELL") {   
    
+      
+      ATTOrder::SetTypeFilling(ENUM_ORDER_TYPE_FILLING::ORDER_FILLING_FOK);
+   
       switch (type) {
       
          case _ORDER_TYPE::STOP:         
          
             if (bs=="BUY") {
-               result = ATTOrder::BuyStop(qtt, price, symbol, sl, tp, ORDER_TIME_GTC, 0, comment);
+               result = ATTOrder::BuyStop(qtt, price, symbol, sl, tp, expireType, expireTime, comment);
             } else {
-               result = ATTOrder::SellStop(qtt, price, symbol, sl, tp, ORDER_TIME_GTC, 0, comment);
+               result = ATTOrder::SellStop(qtt, price, symbol, sl, tp, expireType, expireTime, comment);
             }
             break;
          
          case _ORDER_TYPE::LIMIT:         
          
             if (bs=="BUY") {
-               result = ATTOrder::BuyLimit(qtt, price, symbol, sl, tp, ORDER_TIME_GTC, 0, comment);
+               result = ATTOrder::BuyLimit(qtt, price, symbol, sl, tp, expireType, expireTime, comment);
             } else {
-               result = ATTOrder::SellLimit(qtt, price, symbol, sl, tp, ORDER_TIME_GTC, 0, comment);
+               result = ATTOrder::SellLimit(qtt, price, symbol, sl, tp, expireType, expireTime, comment);
             }
             break;
          
