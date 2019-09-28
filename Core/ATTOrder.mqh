@@ -52,9 +52,6 @@ ulong ATTOrder::Order(_ORDER_TYPE type, const string bs, const string symbol=NUL
    // Trade when 1(buy) or 2(Sell), otherwise reteurn zero  
    if (bs=="BUY" || bs=="SELL") {   
    
-      
-      ATTOrder::SetTypeFilling(ENUM_ORDER_TYPE_FILLING::ORDER_FILLING_FOK);
-   
       switch (type) {
       
          case _ORDER_TYPE::STOP:         
