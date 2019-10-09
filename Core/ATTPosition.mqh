@@ -136,7 +136,6 @@ void ATTPosition::TrailStop(double pointsLoss, double trailingLoss, double trail
                   if (bid > _ATTPrice.Sum(priceDeal, trailingProfit)) {
                      level1 = bid;
                      level2 = _ATTPrice.Subtract(bid, trailingProfitStep);
-                     Print("[BUY] Trailing at: ", level2);
                   }
                   // if prices get back, close positions
                   if (bid <= level2 && level2 > priceDeal) {
@@ -154,7 +153,6 @@ void ATTPosition::TrailStop(double pointsLoss, double trailingLoss, double trail
                   if (ask < _ATTPrice.Subtract(priceDeal, trailingProfit)) {
                      level1 = ask;
                      level2 = _ATTPrice.Sum(ask, trailingProfitStep);
-                     Print("[SELL] Trailing at: ", level2);
                   }
                   // if prices get back, close positions
                   if (ask >= level2 && level2 < priceDeal) {
