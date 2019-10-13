@@ -23,6 +23,14 @@ class ATTIndicator {
            ENUM_MA_METHOD method,            // Simple, Exponential, etc
            ENUM_APPLIED_PRICE appliedPrice   // Open Price, Close Price (default), etc
        );
+       
+      int CalculateRSI
+      (
+         const string symbol,                // EURUSD, WDOQ19, etc
+         ENUM_TIMEFRAMES period,             // M1, M5, M15, etc
+         int ma_period,                      // Periods (candles) to calculate
+         ENUM_APPLIED_PRICE applied_price    // Open Price, Close Price (default), etc
+      );
 };
 
 //+------------------------------------------------------------------+
@@ -53,3 +61,6 @@ double ATTIndicator::CalculateMovingAvarage(const string symbol,
    return value;
 }
 
+int ATTIndicator::CalculateRSI (const string symbol, ENUM_TIMEFRAMES period, int ma_period, ENUM_APPLIED_PRICE applied_price) {
+   return 22;
+}

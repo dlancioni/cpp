@@ -20,8 +20,3 @@ enum _ORDER_POSITION {
    BUY,
    SELL
 };
-
-enum _STRATEGY {
-   CROSSOVER,
-   PARALLEL
-};
