@@ -8,38 +8,38 @@ It uses the financial libs and connectivity provided by MT5 (Meta Trader 5). MT5
 
 What differentiate MT5 from its competitors is the ability to create computer programs that inherits MT5's libraries and let us automate trading routines like track online chart/price or indicators (many possibilities here) and use C++ language to create algorithms that based available information let us interact with current market by open and close positions, trail stops based on specific logics and any other functionality avaiable in the platform.
 
-# Input parameters
-Risk Info
-dailyLoss = 100;              // Daily loss limit per contract
-dailyProfit = 500;            // Daily profit limit per contract
+# Input parameters<br>
+Risk Info<br>
+dailyLoss = 100;              // Daily loss limit per contract<br>
+dailyProfit = 500;            // Daily profit limit per contract<br>
 
-#TradeInfo
-chartTime = 5;                // Chart time
-contracts = 1;                // Number of Contracts
-pointsTrade = 100;            // Points after current price to open trade
-pointsLoss = 200;             // Points stop loss
-pointsProfit = 1000;          // Points stop profit
-tralingProfit = 200;          // Points to trigger dinamic stop profit
-tralingProfitStep = 50;       // Points to trail take profit
-trailingLoss = 50;            // Points to trail stop loss
+#TradeInfo<br>
+chartTime = 5;                // Chart time<br>
+contracts = 1;                // Number of Contracts<br>
+pointsTrade = 100;            // Points after current price to open trade<br>
+pointsLoss = 200;             // Points stop loss<br>
+pointsProfit = 1000;          // Points stop profit<br>
+tralingProfit = 200;          // Points to trigger dinamic stop profit<br>
+tralingProfitStep = 50;       // Points to trail take profit<br>
+trailingLoss = 50;            // Points to trail stop loss<br>
 
-#CrossoverInfo
-period1 = 0;                  // Cross period over short and long 
-period2 = 0;                  // Short period
-period3 = 0;                  // Long period
+#CrossoverInfo<br>
+period1 = 0;                  // Cross period over short and long <br>
+period2 = 0;                  // Short period<br>
+period3 = 0;                  // Long period<br>
 
-#RSIInfo
-lineUpRSI = 70;               // Up line
-lineDnRSI = 30;               // Dn Line
-periodRSI = 14;               // Periods
+#RSIInfo<br>
+lineUpRSI = 70;               // Up line<br>
+lineDnRSI = 30;               // Dn Line<br>
+periodRSI = 14;               // Periods<br>
 
-#Williams % Range
-lineUpWPR = 90;               // Up line
-lineDnWPR = 10;               // Dn Line
-periodWPR = 14;               // Periods
+#Williams % Range<br>
+lineUpWPR = 90;               // Up line<br>
+lineDnWPR = 10;               // Dn Line<br>
+periodWPR = 14;               // Periods<br>
 
-#MFI specific parameters
-lineUpMFI = 80;               // Up line
-lineDnMFI = 20;               // Dn Line
-periodMFI = 14;               // Periods
+#MFI specific parameters<br>
+lineUpMFI = 80;               // Up line<br>
+lineDnMFI = 20;               // Dn Line<br>
+periodMFI = 14;               // Periods<br>
 
