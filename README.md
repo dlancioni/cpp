@@ -5,4 +5,41 @@ Atom is a trading bot (algorithm or computer program) coded in C++ that is able 
 # How it works
 
 It uses the financial libs and connectivity provided by MT5 (Meta Trader 5). MT5 is one of the most popular and easy to use trading platforms around the globe. Basically you connect to your broker account using MT5 client and the tool provides many functionalities like online charts in different timeframes, indicators to analise charts, interface to open and close positions, manage risk, etc. 
-What differentiate MT5 from its competitors is the ability to create computer programs that inherits MT5's libraries and let us automate trading routines like track online chart/price or indicators (many possibilities) and use C++ language to create algorithms that based available information let us interact with current market by open and close positions, trail positions based on specific logics and any other functionality avaiable in the platform.
+
+What differentiate MT5 from its competitors is the ability to create computer programs that inherits MT5's libraries and let us automate trading routines like track online chart/price or indicators (many possibilities here) and use C++ language to create algorithms that based available information let us interact with current market by open and close positions, trail stops based on specific logics and any other functionality avaiable in the platform.
+
+# Input parameters
+Risk Info
+dailyLoss = 100;              // Daily loss limit per contract
+dailyProfit = 500;            // Daily profit limit per contract
+
+##TradeInfo
+chartTime = 5;                // Chart time
+contracts = 1;                // Number of Contracts
+pointsTrade = 100;            // Points after current price to open trade
+pointsLoss = 200;             // Points stop loss
+pointsProfit = 1000;          // Points stop profit
+tralingProfit = 200;          // Points to trigger dinamic stop profit
+tralingProfitStep = 50;       // Points to trail take profit
+trailingLoss = 50;            // Points to trail stop loss
+
+##CrossoverInfo
+period1 = 0;                  // Cross period over short and long 
+period2 = 0;                  // Short period
+period3 = 0;                  // Long period
+
+##RSIInfo
+lineUpRSI = 70;               // Up line
+lineDnRSI = 30;               // Dn Line
+periodRSI = 14;               // Periods
+
+##Williams % Range
+lineUpWPR = 90;               // Up line
+lineDnWPR = 10;               // Dn Line
+periodWPR = 14;               // Periods
+
+##MFI specific parameters
+lineUpMFI = 80;               // Up line
+lineDnMFI = 20;               // Dn Line
+periodMFI = 14;               // Periods
+
