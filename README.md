@@ -13,7 +13,7 @@ Risk Info
 dailyLoss = 100;              // Daily loss limit per contract
 dailyProfit = 500;            // Daily profit limit per contract
 
-##TradeInfo
+#TradeInfo
 chartTime = 5;                // Chart time
 contracts = 1;                // Number of Contracts
 pointsTrade = 100;            // Points after current price to open trade
@@ -23,22 +23,22 @@ tralingProfit = 200;          // Points to trigger dinamic stop profit
 tralingProfitStep = 50;       // Points to trail take profit
 trailingLoss = 50;            // Points to trail stop loss
 
-##CrossoverInfo
+#CrossoverInfo
 period1 = 0;                  // Cross period over short and long 
 period2 = 0;                  // Short period
 period3 = 0;                  // Long period
 
-##RSIInfo
+#RSIInfo
 lineUpRSI = 70;               // Up line
 lineDnRSI = 30;               // Dn Line
 periodRSI = 14;               // Periods
 
-##Williams % Range
+#Williams % Range
 lineUpWPR = 90;               // Up line
 lineDnWPR = 10;               // Dn Line
 periodWPR = 14;               // Periods
 
-##MFI specific parameters
+#MFI specific parameters
 lineUpMFI = 80;               // Up line
 lineDnMFI = 20;               // Dn Line
 periodMFI = 14;               // Periods
