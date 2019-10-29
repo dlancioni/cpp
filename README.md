@@ -28,10 +28,10 @@ period1 = 0;                  // Cross period over short and long <br>
 period2 = 0;                  // Short period<br>
 period3 = 0;                  // Long period<br>
 
-S&RInfo = "----------";       // Support and resistence levels
-_resistenceLevel = 70;        // Resistence level
-_supportLevel = 30;           // Support level
-_period = 14;                 // Periods for Support and Resistence
+S&RInfo = "----------";       // Support and resistence levels <br>
+_resistenceLevel = 70;        // Resistence level <br>
+_supportLevel = 30;           // Support level <br>
+_period = 14;                 // Periods for Support and Resistence <br>
 
 # Page under construction
 
