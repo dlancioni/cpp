@@ -16,7 +16,6 @@ class ATTMath {
    public:
        double Sum(double value1, double value2);
        double Subtract(double value1, double value2);
-
 };
 
 //+------------------------------------------------------------------+
