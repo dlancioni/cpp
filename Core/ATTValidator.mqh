@@ -77,9 +77,6 @@ string ATTValidator::ValidateExpired() {
 string ATTValidator::ValidateAmount(double amount) {
 
    string value = "";
-   
-   if (amount > 1)
-      value = "This service is free for small investments, to trade unlimited contracts consider support this project. Email dlancioni@gmail.com for details ";
       
    if (amount <= 0)
       value = "Must inform number of contracts (amount)";
