@@ -24,17 +24,17 @@
 // Define input parameters (comments are labels)
 //
 input string RiskInfo = "----------";       // Risk Info
-input double _dailyProfit = 100;            // Daily profit limit
-input double _dailyLoss = 200;              // Daily loss limit
+input double _dailyProfit = 1000;           // Daily profit limit
+input double _dailyLoss = 1000;             // Daily loss limit
 input string TradeInfo = "----------";      // Trade Info 
 input ENUM_TIMEFRAMES _chartTime = 1;       // Chart time
 input double _contracts = 5;                // Number of Contracts
 input double _pointsTrade = 10;             // Points after current price to open trade
-input double _pointsLoss = 50;              // Points stop loss
-input double _pointsProfit = 50;            // Points take profit
+input double _pointsLoss = 400;             // Points stop loss
+input double _pointsProfit = 400;           // Points take profit
 input double _tralingProfit = 0;            // Points to trigger dinamic stop profit
 input double _tralingProfitStep = 0;        // Points to trail take profit
-input double _trailingLoss = 10;            // Points to trail stop loss
+input double _trailingLoss = 50;            // Points to trail stop loss
 input string CrossoverInfo = "----------";  // Crossover setup
 input int _mavgShort = 7;                   // Short moving avarage
 input int _mavgLong = 21;                   // Long moving avarage
@@ -149,7 +149,7 @@ void Trade(double bid, double ask, double mavgShort, double mavgLong) {
    mavgDiff = MathAbs(__ATTMath.Subtract(mavgLong, mavgShort));
    
    // Log current level:
-   Comment("moving Avg: ", mavgDiff, "   ", "lastCross: ", lastCross);
+   Comment("moving Avg: ", mavgDiff, "  ", "lastCross: ", lastCross);
 
    // Trade on support and resistence crossover
    if (mavgShort < mavgLong) {
