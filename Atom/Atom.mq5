@@ -38,7 +38,7 @@ input double _trailingLoss = 50;            // Points to trail stop loss
 input string CrossoverInfo = "----------";  // Crossover setup
 input int _mavgShort = 7;                   // Short moving avarage
 input int _mavgLong = 21;                   // Long moving avarage
-input double _mavgDiffAvoid = 0;            // Avoid open position in this level
+input double _mavgDiffAvoid = 10;           // Avoid open position in this level
 
 //
 // General Declaration
