@@ -38,7 +38,7 @@ input double _trailingLoss = 50;            // Points to trail stop loss
 input string CrossoverInfo = "----------";  // Crossover setup
 input int _mavgShort = 7;                   // Short moving avarage
 input int _mavgLong = 21;                   // Long moving avarage
-input double _mavgDiffAvoid = 10;           // Avoid open position in this level
+input double _mavgDiffAvoid = 0;            // Avoid open position in this level
 
 //
 // General Declaration
@@ -152,15 +152,17 @@ void Trade(double bid, double ask, double mavgShort, double mavgLong) {
    Comment("moving Avg: ", mavgDiff, "  ", "lastCross: ", lastCross);
 
    // Trade on support and resistence crossover
-   if (mavgShort < mavgLong) {
-      buy = false;
-      sell = true;
-      cross = DN;
-   }
-   if (mavgShort > mavgLong) {      
-      buy = true;
-      sell = false;
-      cross = UP;
+   if (mavgDiff > _mavgDiffAvoid) {
+      if (mavgShort < mavgLong) {
+            buy = false;
+            sell = true;
+            cross = DN;
+      }
+      if (mavgShort > mavgLong) {      
+         buy = true;
+         sell = false;
+         cross = UP;
+      }
    }
    
    // If cross changed, rever position   
