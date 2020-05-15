@@ -30,15 +30,15 @@ input string TradeInfo = "----------";      // Trade Info
 input ENUM_TIMEFRAMES _chartTime = 1;       // Chart time
 input double _contracts = 5;                // Number of Contracts
 input double _pointsTrade = 10;             // Points after current price to open trade
-input double _pointsLoss = 500;             // Points stop loss
-input double _pointsProfit = 100;           // Points take profit
+input double _pointsLoss = 250;             // Points stop loss
+input double _pointsProfit = 250;           // Points take profit
 input double _tralingProfit = 0;            // Points to trigger dinamic stop profit
 input double _tralingProfitStep = 0;        // Points to trail take profit
 input double _trailingLoss = 0;             // Points to trail stop loss
 input string CrossoverInfo = "----------";  // Crossover setup
 input int _mavgShort = 7;                   // Short moving avarage
 input int _mavgLong = 21;                   // Long moving avarage
-input double _mavgDiffAvoid = 10;           // Avoid open position in this level
+input double _mavgDiffAvoid = 100;          // Avoid open position in this level
 
 //
 // General Declaration
@@ -150,25 +150,29 @@ void Trade(double bid, double ask, double mavgShort, double mavgLong) {
    
    // Log current level:
    Comment("moving Avg: ", mavgDiff, "  ", "lastCross: ", lastCross);
-
-   // Trade on support and resistence crossover
-   if (mavgDiff > _mavgDiffAvoid) {
-      if (mavgShort < mavgLong) {
-            buy = false;
-            sell = true;
-            cross = DN;
-      }
-      if (mavgShort > mavgLong) {      
-         buy = true;
-         sell = false;
-         cross = UP;
-      }
-   }
    
+   // Trade on support and resistence crossover
+   if (mavgShort > mavgLong) {
+      buy = true;
+      sell = false;
+      cross = UP;
+   } else {     
+      buy = false;
+      sell = true;
+      cross = DN;
+   }
+      
    // Trade on cross only
    if (lastCross != cross) {
       lastCross = cross;
-   }   
+      if (mavgDiff < _mavgDiffAvoid) {
+         buy = false;
+         sell = false; 
+      }     
+   } else {
+      buy = false;
+      sell = false;   
+   }  
 
    // True indicates a trade signal was identified
    if (buy || sell) {
