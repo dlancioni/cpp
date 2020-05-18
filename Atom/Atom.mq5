@@ -30,15 +30,15 @@ input string TradeInfo = "----------";      // Trade Info
 input ENUM_TIMEFRAMES _chartTime = 1;       // Chart time
 input double _contracts = 5;                // Number of Contracts
 input double _pointsTrade = 10;             // Points after current price to open trade
-input double _pointsLoss = 250;             // Points stop loss
-input double _pointsProfit = 250;           // Points take profit
+input double _pointsLoss = 1000;            // Points stop loss
+input double _pointsProfit = 1000;          // Points take profit
 input double _tralingProfit = 0;            // Points to trigger dinamic stop profit
 input double _tralingProfitStep = 0;        // Points to trail take profit
 input double _trailingLoss = 0;             // Points to trail stop loss
 input string CrossoverInfo = "----------";  // Crossover setup
 input int _mavgShort = 7;                   // Short moving avarage
 input int _mavgLong = 21;                   // Long moving avarage
-input double _mavgDiffAvoid = 50;           // Avoid open position in this level
+input double _tradingLevel = 1000;          // Minimum level to open positions
 
 //
 // General Declaration
@@ -149,15 +149,15 @@ void Trade(double bid, double ask, double mavgShort, double mavgLong) {
    mavgDiff = MathAbs(__ATTMath.Subtract(mavgLong, mavgShort));
    
    // Log current level:
-   Comment("moving Avg: ", mavgDiff, "  ", "lastCross: ", lastCross);
+   Comment("Level: ", mavgDiff, "  ", "Last Cross: ", lastCross);
    
    // Trade on support and resistence crossover
-   if ((mavgShort > mavgLong) && (mavgDiff > _mavgDiffAvoid)) {
+   if ((mavgShort > mavgLong) && (mavgDiff > _tradingLevel)) {
       cross = UP;
       buy = true;
       sell = false;
    }  
-   if ((mavgShort < mavgLong) && (mavgDiff > _mavgDiffAvoid)) {      
+   if ((mavgShort < mavgLong) && (mavgDiff > _tradingLevel)) {      
       cross = DN;
       buy = false;
       sell = true;
