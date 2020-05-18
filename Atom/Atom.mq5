@@ -186,13 +186,13 @@ void Trade(double bid, double ask, double mavgShort, double mavgLong) {
          priceDeal = __ATTPrice.Sum(ask, _pointsTrade);
          priceLoss = __ATTPrice.Subtract(priceDeal, _pointsLoss);
          priceProfit = __ATTPrice.Sum(priceDeal, _pointsProfit);
-         orderId = __ATTOrder.Buy(_ORDER_TYPE::STOP, Symbol(), _contracts, priceDeal, priceLoss, priceProfit);
+         orderId = __ATTOrder.Buy(_ORDER_TYPE::MARKET, Symbol(), _contracts, priceDeal, priceLoss, priceProfit);
       }
       if (sell) {
          priceDeal = __ATTPrice.Subtract(bid, _pointsTrade);
          priceLoss = __ATTPrice.Sum(priceDeal, _pointsLoss);
          priceProfit = __ATTPrice.Subtract(priceDeal, _pointsProfit);
-         orderId = __ATTOrder.Sell(_ORDER_TYPE::STOP, Symbol(), _contracts, priceDeal, priceLoss, priceProfit);
+         orderId = __ATTOrder.Sell(_ORDER_TYPE::MARKET, Symbol(), _contracts, priceDeal, priceLoss, priceProfit);
       }
    } else {
        __ATTPosition.TrailStop(_pointsLoss, _trailingLoss, _tralingProfit, _tralingProfitStep);
