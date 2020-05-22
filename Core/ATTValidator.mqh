@@ -64,10 +64,9 @@ string ATTValidator::ValidateExpired() {
    MqlDateTime time;
    TimeCurrent(time);
    
-   if (time.mon == 1) {
-      value = "This version of Atom has expired at 12/31/19. Get latest version at github.com/dlancioni/atom";
+   if (time.mon == 4 || time.mon == 8 || time.mon == 12) {
+      value = "This version of Atom has expired. Get latest version at github.com/dlancioni/atom";
    }   
-
    return value;
 }
 
