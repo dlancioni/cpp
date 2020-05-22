@@ -9,12 +9,10 @@
 #include "..\Core\ATTValidator.mqh"
 
 //+------------------------------------------------------------------------------------------------------+
-//| algo1.mq5                                                                                            |
-//| Copyright 2019, MetaQuotes Software Corp.                                                            |
+//| atom.mq5                                                                                             |
+//| Author David Lancioni 05/2020                                                                        |
 //| https://www.mql5.com                                                                                 |
-//| Crossing up: If price is 100000, open a buy order at 100100, with loss on 100000 and gain on 100600  |
-//| Crossing dn: If price is 100000, open a sell order at 99900, with loss on 100000 and gain on 99400   |
-//| If there is a cross but no order is executed, existing order must be reverted                        |
+//| Crossover strategy                                                                                   |
 //+------------------------------------------------------------------------------------------------------+
 #property copyright "Copyright 2019, MetaQuotes Software Corp."
 #property link      "https://www.mql5.com"
