@@ -51,7 +51,6 @@ ATTValidator __ATTValidator;
 ATTMath __ATTMath;
 string cross = "";
 string lastCross = "";
-double initialBalance = 0.0;     // Used to limit profit and loss in daily basis
 
 //
 // Init the values
@@ -59,9 +58,6 @@ double initialBalance = 0.0;     // Used to limit profit and loss in daily basis
 int OnInit() {
 
    string msg = "";
-
-   // Used to limit profit and loss in daily basis
-   initialBalance = __ATTBalance.GetBalance();
    
    // Validate input parameters related to trade and abort program if something is wrong
    msg = __ATTValidator.ValidateParameters(_dailyLoss, 
@@ -108,7 +104,7 @@ void OnTick() {
 
    // If no price, no deal (markets closed, or off-line)
    if (bid > 0 && ask > 0) {
-      if (!__ATTBalance.IsResultOverLimits(initialBalance, _dailyLoss, _dailyProfit)) {
+      if (!__ATTBalance.IsResultOverLimits(_dailyLoss, _dailyProfit)) {
          tradeCrossoverStrategy();
       } else {
          Print("Daily limits exceeded");
