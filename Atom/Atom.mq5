@@ -43,14 +43,14 @@ input double _tralingProfitStep = 0;        // Points to trail take profit
 //
 // General Declaration
 //
-ATTOrder __ATTOrder;
-ATTPrice __ATTPrice;
-ATTSymbol __ATTSymbol;
-ATTBalance __ATTBalance;
-ATTPosition __ATTPosition;
-ATTIndicator __ATTIndicator;  
-ATTValidator __ATTValidator;
-ATTMath __ATTMath;
+ATTOrder ATOrder;
+ATTPrice ATPrice;
+ATTSymbol ATSymbol;
+ATTBalance ATBalance;
+ATTPosition ATPosition;
+ATTIndicator ATIndicator;  
+ATTValidator ATValidator;
+ATTMath ATMath;
 string cross = "";
 string lastCross = "";
 
@@ -62,18 +62,18 @@ int OnInit() {
    string msg = "";
    
    // Validate input parameters related to trade and abort program if something is wrong
-   msg = __ATTValidator.ValidateParameters(_dailyLoss, 
-                                           _dailyProfit,
-                                           _contracts, 
-                                           _pointsTrade, 
-                                           _pointsLoss,
-                                           _pointsProfit, 
-                                           _trailingLoss, 
-                                           _tralingProfit, 
-                                           _tralingProfitStep,
-                                           _shortAvg,
-                                           _longAvg,
-                                           _diffAvg);
+   msg = ATValidator.ValidateParameters(_dailyLoss, 
+                                        _dailyProfit,
+                                        _contracts, 
+                                        _pointsTrade, 
+                                        _pointsLoss,
+                                        _pointsProfit, 
+                                        _trailingLoss, 
+                                        _tralingProfit, 
+                                        _tralingProfitStep,
+                                        _shortAvg,
+                                        _longAvg,
+                                        _diffAvg);
    if (msg != "") {
       Print(msg);
       Alert(msg);
@@ -96,17 +96,18 @@ void OnDeinit(const int reason) {
 //
 void OnTick() {
 
+   string symbol = Symbol();
    double bid = 0.0;         // Current bid price 
    double ask = 0.0;         // Current ask price
   
    // Get prices   
-   bid = __ATTSymbol.Bid();
-   ask = __ATTSymbol.Ask();
+   bid = ATSymbol.Bid();
+   ask = ATSymbol.Ask();
 
    // If no price, no deal (markets closed, or off-line)
    if (bid > 0 && ask > 0) {
-      if (!__ATTBalance.IsResultOverLimits(_dailyLoss, _dailyProfit)) {
-         tradeCrossoverStrategy();
+      if (!ATBalance.IsResultOverLimits(_dailyLoss, _dailyProfit)) {
+         tradeCrossoverStrategy(symbol);
       }
    } else {
        Print("No price available");
@@ -116,7 +117,7 @@ void OnTick() {
 //
 // Open position as indicators are attended
 //
-void tradeCrossoverStrategy() {
+void tradeCrossoverStrategy(string symbol) {
 
    // General declaration
    const string UP = "UP";
@@ -131,17 +132,18 @@ void tradeCrossoverStrategy() {
    double shortAvg = 0;
    double longAvg = 0;
    double diffAvg = 0;
-   
+      
    // Get avgs and calculate difference
-   shortAvg = __ATTIndicator.CalculateMovingAvarage(Symbol(), _chartTime, _shortAvg);
-   longAvg = __ATTIndicator.CalculateMovingAvarage(Symbol(), _chartTime, _longAvg);
-   diffAvg = MathAbs(__ATTMath.Subtract(longAvg, shortAvg));
+   shortAvg = ATIndicator.CalculateMovingAvarage(symbol, _chartTime, _shortAvg);
+   longAvg = ATIndicator.CalculateMovingAvarage(symbol, _chartTime, _longAvg);
+   diffAvg = MathAbs(ATMath.Subtract(longAvg, shortAvg));
    
    // Log current level:
    Comment("Diff: ", diffAvg, "  ", "Cross: ", lastCross);
    
    // Trade on support and resistence crossover
    if (shortAvg > longAvg) {
+       sl = ATSymbol.Ask();
        if (diffAvg > _diffAvg) {
            cross = UP;
            buy = true;
@@ -149,6 +151,7 @@ void tradeCrossoverStrategy() {
        }
    }  
    if (shortAvg < longAvg) {      
+      tp = ATSymbol.Bid();
        if (diffAvg > _diffAvg) {
           cross = DN;
           buy = false;
@@ -166,8 +169,8 @@ void tradeCrossoverStrategy() {
 
    // True indicates a trade signal was identified
    if (buy || sell) {
-      __ATTOrder.CloseAllOrders();
-      __ATTPosition.CloseAllPositions();
+      ATOrder.CloseAllOrders();
+      ATPosition.CloseAllPositions();
    } else {
       buy = false;
       sell = false;
@@ -176,18 +179,22 @@ void tradeCrossoverStrategy() {
    // Do not open more than one position at a time
    if (PositionsTotal() == 0) {
       if (buy) {
-         price = __ATTPrice.Sum(__ATTSymbol.Ask(), _pointsTrade);
-         sl = __ATTPrice.Subtract(price, _pointsLoss);
-         tp = __ATTPrice.Sum(price, _pointsProfit);
-         orderId = __ATTOrder.Buy(_ORDER_TYPE::MARKET, Symbol(), _contracts, price, sl, tp);
+         price = ATPrice.Sum(ATSymbol.Ask(), _pointsTrade);
+         if (sl == 0) {
+             sl = ATPrice.Subtract(price, _pointsLoss);
+         }    
+         tp = ATPrice.Sum(price, _pointsProfit);
+         orderId = ATOrder.Buy(_ORDER_TYPE::MARKET, symbol, _contracts, price, sl, tp);
       }
       if (sell) {
-         price = __ATTPrice.Subtract(__ATTSymbol.Bid(), _pointsTrade);
-         sl = __ATTPrice.Sum(price, _pointsLoss);
-         tp = __ATTPrice.Subtract(price, _pointsProfit);
-         orderId = __ATTOrder.Sell(_ORDER_TYPE::MARKET, Symbol(), _contracts, price, sl, tp);
+         price = ATPrice.Subtract(ATSymbol.Bid(), _pointsTrade);
+         if (sl == 0) {         
+            sl = ATPrice.Sum(price, _pointsLoss);
+         }
+         tp = ATPrice.Subtract(price, _pointsProfit);
+         orderId = ATOrder.Sell(_ORDER_TYPE::MARKET, symbol, _contracts, price, sl, tp);
       }
    } else {
-       __ATTPosition.TrailStop(_pointsLoss, _trailingLoss, _tralingProfit, _tralingProfitStep);
+       ATPosition.TrailStop(_pointsLoss, _trailingLoss, _tralingProfit, _tralingProfitStep);
    }
 }
