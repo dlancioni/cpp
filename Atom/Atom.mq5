@@ -138,6 +138,20 @@ void tradeCrossoverStrategy(string symbol) {
    longAvg = ATIndicator.CalculateMovingAvarage(symbol, _chartTime, _longAvg);
    diffAvg = MathAbs(ATMath.Subtract(longAvg, shortAvg));
    
+   // Ajust according to digits
+   switch (Digits()) {
+      case 3:
+         diffAvg = diffAvg * 1000;
+         break;   
+      case 5:
+         diffAvg = diffAvg * 100000;
+         break;
+      default:
+         diffAvg = diffAvg;       
+   }
+   
+   Print("shortAvg: ", shortAvg, " longAvg: ", longAvg, " diffAvg: ", diffAvg);
+      
    // Log current level:
    Comment("Diff: ", diffAvg, "  ", "Cross: ", lastCross);
    

@@ -20,7 +20,7 @@ double ATTPrice::Sum(double price=0.0, double points=0.0) {
 
    // Price must end in 0 or 5 (b3 futures)   
    if (points > 0) {
-      price = (double) NormalizeDouble((price + (points * point)), digits);      
+      price = (double) NormalizeDouble((price + (points * point)), digits);
       if (tickSize == 0.5 || tickSize == 5.0) {
          while (MathMod(price, tickSize) > 0) {
             price = NormalizeDouble(price + point, digits);
