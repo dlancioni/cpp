@@ -1,15 +1,7 @@
-//+------------------------------------------------------------------+
-//|                                                     ATTPrice.mqh |
-//|                        Copyright 2019, MetaQuotes Software Corp. |
-//|                                             https://www.mql5.com |
-//+------------------------------------------------------------------+
 #property copyright "Copyright 2019, MetaQuotes Software Corp."
 #property link      "https://www.mql5.com"
 #property version   "1.00"
 
-//+------------------------------------------------------------------+
-//| Pricing related methods (bid/ask, gain/loss, etc                 |
-//+------------------------------------------------------------------+
 class ATTPrice {
    private:
    public:
@@ -19,65 +11,44 @@ class ATTPrice {
        double GetAverage(double price1, double price2);
 };
 
-//+------------------------------------------------------------------+
-//| Calculate loss or profits                                        |
-//+------------------------------------------------------------------+
-double ATTPrice::Sum(double price=0.0, double pts=0.0) {
+double ATTPrice::Sum(double price=0.0, double points=0.0) {
 
    // General declaration   
-   double value = 0.0;
-   double points = 0.0;
+   int digits = Digits();
    double tickSize = SymbolInfoDouble(Symbol(), SYMBOL_TRADE_TICK_SIZE);
-   ulong digits = SymbolInfoInteger(Symbol(), SYMBOL_DIGITS);
-   
-   // Calculate the points
-   if (digits == 0) {
-      points = pts * Point();
-   } else {
-      points = pts / Digits();
-   }
-   
-   // Calculate value based on given points
-   value = NormalizeDouble(price + points, Digits());
+   double point = SymbolInfoDouble(Symbol(), SYMBOL_POINT);
 
-   // Normalize the final value according to the tick size   
-   if (digits == 0) {
-      while (MathMod(value, tickSize) > 0) {
-         value = NormalizeDouble(value + Point(), Digits());
-      }              
-   }  
-   
-   // Just return
-   return value;
-}
-
-double ATTPrice::Subtract(double price=0.0, double pts=0.0) {
-
-   // General declaration   
-   double value = 0.0;
-   double points = 0.0;
-   double tickSize = SymbolInfoDouble(Symbol(), SYMBOL_TRADE_TICK_SIZE);
-   ulong digits = SymbolInfoInteger(Symbol(), SYMBOL_DIGITS);   
-
-   // Calculate the points
-   if (digits == 0) {
-      points = pts * Point();
-   } else {
-      points = pts / Digits();
-   }
-
-   // Calculate value based on given points
-   value = NormalizeDouble(price - points, Digits());
-
-   // Normalize the final value according to the tick size   
-   if (digits == 0) {
-      while (MathMod(value, tickSize) > 0) {
-         value = NormalizeDouble(value - Point(), Digits());
+   // Price must end in 0 or 5 (b3 futures)   
+   if (points > 0) {
+      price = (double) NormalizeDouble((price + (points * point)), digits);      
+      if (tickSize == 0.5 || tickSize == 5.0) {
+         while (MathMod(price, tickSize) > 0) {
+            price = NormalizeDouble(price + point, digits);
+         }
       }
    }
    
-   // Just return
-   return value;
+   return price;
+}
+
+double ATTPrice::Subtract(double price=0.0, double points=0.0) {
+
+   // General declaration   
+   int digits = Digits();
+   double tickSize = SymbolInfoDouble(Symbol(), SYMBOL_TRADE_TICK_SIZE);
+   double point = SymbolInfoDouble(Symbol(), SYMBOL_POINT);
+
+   // Price must end in 0 or 5 (b3 futures)  
+   if (points > 0) {
+      price = (double) NormalizeDouble((price - (points * point)), digits);      
+      if (tickSize == 0.5 || tickSize == 5.0) {
+         while (MathMod(price, tickSize) > 0) {
+            price = NormalizeDouble(price - point, digits);
+         }
+      }
+   }
+   
+   return price;
 }
 
 double ATTPrice::GetPoints(double price1, double price2) {
