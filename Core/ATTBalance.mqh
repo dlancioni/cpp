@@ -20,7 +20,7 @@ class ATTBalance {
        double GetEquity();       // Account balance plus current PnL
        double GetMargin();       // Used margin       
        double GetDailyPnl();     // Sum of history profit
-       bool IsResultOverLimits(double, double); // Risk Control - limit profit or loss
+       bool IsResultOverLimits(double, double, double); // Risk Control - limit profit or loss
 };
 
 //+------------------------------------------------------------------+
@@ -80,13 +80,9 @@ double ATTBalance::GetDailyPnl() {
    return pnl;
 }
 
-bool ATTBalance::IsResultOverLimits(double limitLoss, double limitProfit) {
+bool ATTBalance::IsResultOverLimits(double pnl, double limitLoss, double limitProfit) {
 
    bool flag = false;
-   double pnl = 0;
-   
-   // Get daily PnL
-   pnl = ATTBalance::GetDailyPnl();   
 
    // Profit limit
    if (pnl >= limitProfit) {

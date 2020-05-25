@@ -55,7 +55,7 @@ string cross = "";
 string lastCross = "";
 double slb = 0;         // Stop loss buy
 double sls = 0;         // Stop loss sell
-
+double dailyPnL = 0;
 //
 // Init the values
 //
@@ -80,10 +80,21 @@ int OnInit() {
       Print(msg);
       Alert(msg);
       ExpertRemove();
-   }  
+   }
+   
+   // Load current PnL (very important if services go down)
+   dailyPnL = ATBalance.GetDailyPnl();
 
    // Go ahead
    return(INIT_SUCCEEDED);
+}
+
+
+//
+// Reload risk information after change on trading related (order, deal, etc)
+//
+void OnTrade() {
+   dailyPnL = ATBalance.GetDailyPnl();
 }
 
 //
@@ -108,7 +119,7 @@ void OnTick() {
 
    // If no price, no deal (markets closed, or off-line)
    if (bid > 0 && ask > 0) {
-      if (!ATBalance.IsResultOverLimits(_dailyLoss, _dailyProfit)) {
+      if (!ATBalance.IsResultOverLimits(dailyPnL, _dailyLoss, _dailyProfit)) {
          tradeCrossoverStrategy(symbol);
       }
    } else {
@@ -151,7 +162,7 @@ void tradeCrossoverStrategy(string symbol) {
          diffAvg = diffAvg;       
    }
    
-   Comment("Diff: ", diffAvg, "  ", "Cross: ", lastCross);
+   Comment("Diff: ", diffAvg, " Cross: ", lastCross, " PnL: ", dailyPnL);
    
    // Cross UP
    if (shortAvg > longAvg) {
