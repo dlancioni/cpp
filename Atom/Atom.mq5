@@ -53,6 +53,8 @@ ATTValidator ATValidator;
 ATTMath ATMath;
 string cross = "";
 string lastCross = "";
+double slb = 0;         // Stop loss buy
+double sls = 0;         // Stop loss sell
 
 //
 // Init the values
@@ -127,12 +129,10 @@ void tradeCrossoverStrategy(string symbol) {
    bool sell = false;   
    ulong orderId = 0;
    double price = 0;
-   double slb = 0;         // Stop loss buy
-   double sls = 0;         // Stop loss sell
-   double tp = 0;
    double shortAvg = 0;
    double longAvg = 0;
    double diffAvg = 0;
+   double tp = 0;   
       
    // Get avgs and calculate difference
    shortAvg = ATIndicator.CalculateMovingAvarage(symbol, _chartTime, _shortAvg);
