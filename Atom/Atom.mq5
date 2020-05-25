@@ -195,6 +195,12 @@ void tradeCrossoverStrategy(string symbol) {
       buy = false;
       sell = false;
    }
+   
+   // Points loss informed, disregard automatic prices
+   if (_pointsLoss > 0) {
+       slb = 0;
+       sls = 0;       
+   }
 
    // Do not open more than one position at a time
    if (PositionsTotal() == 0) {

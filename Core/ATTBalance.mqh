@@ -15,10 +15,11 @@ class ATTBalance {
    private:
 
    public:
-       double GetBalance(); // Total account balance
-       double GetProfit();     // PnL for current opened position
-       double GetEquity();  // Account balance plus current PnL
-       double GetMargin();  // Used margin       
+       double GetBalance();      // Total account balance
+       double GetProfit();       // PnL for current opened position
+       double GetEquity();       // Account balance plus current PnL
+       double GetMargin();       // Used margin       
+       double GetDailyPnl();     // Sum of history profit
        bool IsResultOverLimits(double, double); // Risk Control - limit profit or loss
 };
 
@@ -41,18 +42,53 @@ double ATTBalance::GetMargin() {
    return AccountInfoDouble(ACCOUNT_MARGIN);
 }
 
+double ATTBalance::GetDailyPnl() {
+   
+    // General Declaration
+    ulong ticket = 0;
+    datetime time;
+    string symbol = "";
+    double profit = 0;
+    double pnl = 0;
+    uint total = 0;
+    
+    datetime from = StringToTime("2020.05.25 [00:00]");
+    datetime to = StringToTime("2020.06.31 [23:59]");
+   
+   // Select deals form history
+    HistorySelect(from, to);
+    total = HistoryDealsTotal();
+   
+    // Iterate over daily history   
+    for (uint i=0; i<total; i++) {
+        if((ticket = HistoryDealGetTicket(i)) > 0) {            
+            symbol = HistoryDealGetString(ticket, DEAL_SYMBOL);
+            profit = HistoryDealGetDouble(ticket, DEAL_PROFIT);
+            time  = (datetime) HistoryDealGetInteger(ticket,DEAL_TIME);            
+	         profit = HistoryDealGetDouble(ticket, DEAL_PROFIT);
+            pnl += profit;
+        }
+    }
+
+   return pnl;
+}
+
 bool ATTBalance::IsResultOverLimits(double limitLoss, double limitProfit) {
 
    bool flag = false;
+   double pnl = 0;
+   
+   // Get daily PnL
+   pnl = ATTBalance::GetDailyPnl();   
 
    // Profit limit
-   if (ATTBalance::GetProfit() >= limitProfit) {
+   if (pnl >= limitProfit) {
        flag = true;
        Print("Profit limited achieved, no more trades today: ", ATTBalance::GetProfit());
    }
 
    // Loss limit (must negative it)
-   if (ATTBalance::GetProfit() <= limitLoss*-1) {
+   if (pnl <= limitLoss*-1) {
        flag = true;
        Print("Loss limited achieved, no more trades today: ", ATTBalance::GetProfit());
    }   
