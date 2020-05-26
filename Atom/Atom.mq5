@@ -167,7 +167,7 @@ void tradeCrossoverStrategy(string symbol) {
    // Cross UP
    if (shortAvg > longAvg) {
        if (slb == 0.0) {
-           slb = ATSymbol.Ask();
+           slb = shortAvg;
            sls = 0;
        }
        if (diffAvg > _diffAvg) {
@@ -180,7 +180,7 @@ void tradeCrossoverStrategy(string symbol) {
    // Cross DN   
    if (shortAvg < longAvg) {         
        if (sls == 0.0) {
-           sls = ATSymbol.Bid();
+           sls = shortAvg;
            slb = 0;
        }
        if (diffAvg > _diffAvg) {
