@@ -3,21 +3,11 @@
 #include "ATTSymbol.mqh"
 #include "ATTOrder.mqh"
 #include "ATTDef.mqh"
-// https://www.mql5.com/pt/docs/standardlibrary/tradeclasses/ctrade
-// https://www.youtube.com/watch?v=VL1_NGaAOaU
 
-//+------------------------------------------------------------------+
-//|                                                     ATTTrade.mqh |
-//|                        Copyright 2019, MetaQuotes Software Corp. |
-//|                                             https://www.mql5.com |
-//+------------------------------------------------------------------+
 #property copyright "Copyright 2019, MetaQuotes Software Corp."
 #property link      "https://www.mql5.com"
 #property version   "1.00"
 
-//+------------------------------------------------------------------+
-//| Provide methods do open and close deals                          |
-//+------------------------------------------------------------------+
 class ATTPosition : public CPositionInfo {
    private:
       bool ModifyPosition(ulong orderId, double sl, double tp);    
@@ -30,17 +20,11 @@ class ATTPosition : public CPositionInfo {
       void TrailStop(double, double, double, double);
 };
 
-//+------------------------------------------------------------------+
-//| Constructor/Destructor                                        |
-//+------------------------------------------------------------------+
 ATTPosition::ATTPosition() {
 }
 ATTPosition::~ATTPosition() {
 }
 
-//+------------------------------------------------------------------+
-//| Delete all pending orders                                        |
-//+------------------------------------------------------------------+
 void ATTPosition::CloseAllPositions() {
 
     // General Declaration
@@ -54,9 +38,6 @@ void ATTPosition::CloseAllPositions() {
      }
 }
 
-//+------------------------------------------------------------------+
-//| Modify existing order                                            |
-//+------------------------------------------------------------------+
 bool ATTPosition::ModifyPosition(ulong id=0, double sl=0.0, double tp=0.0) {
     CTrade trade;
     bool status = false;    
@@ -64,9 +45,6 @@ bool ATTPosition::ModifyPosition(ulong id=0, double sl=0.0, double tp=0.0) {
     return status;
 }
 
-//+------------------------------------------------------------------+
-//| Handle dinamic stops                                             |
-//+------------------------------------------------------------------+
 void ATTPosition::TrailStop(double pointsLoss, double trailingLoss, double trailingProfit, double trailingProfitStep) {
 
    // General Declaration

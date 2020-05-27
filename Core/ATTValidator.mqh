@@ -1,18 +1,10 @@
 #include <Trade\Trade.mqh>
 #include "ATTDef.mqh"
 
-//+------------------------------------------------------------------+
-//|                                                     ATTPrice.mqh |
-//|                        Copyright 2019, MetaQuotes Software Corp. |
-//|                                             https://www.mql5.com |
-//+------------------------------------------------------------------+
 #property copyright "Copyright 2019, MetaQuotes Software Corp."
 #property link      "https://www.mql5.com"
 #property version   "1.00"
 
-//+------------------------------------------------------------------+
-//| Pricing related methods (bid/ask, gain/loss, etc                 |
-//+------------------------------------------------------------------+
 class ATTValidator {
    private:
       string ValidateExpired();
@@ -26,9 +18,6 @@ class ATTValidator {
 
 };
 
-//+------------------------------------------------------------------+
-//| Validate all input parameter                                     |
-//+------------------------------------------------------------------+
 string ATTValidator::ValidateParameters(double dailyLoss, 
                                         double dailyProfit,
                                         double contracts, 
@@ -55,9 +44,6 @@ string ATTValidator::ValidateParameters(double dailyLoss,
    return value;
 }
 
-//+------------------------------------------------------------------+
-//| Validate the amount                                              |
-//+------------------------------------------------------------------+
 string ATTValidator::ValidateExpired() {
 
    string value = "";
@@ -76,9 +62,6 @@ string ATTValidator::ValidateExpired() {
    return value;
 }
 
-//+------------------------------------------------------------------+
-//| Validate the amount                                              |
-//+------------------------------------------------------------------+
 string ATTValidator::ValidateAmount(double amount) {
 
    string value = "";
@@ -89,9 +72,6 @@ string ATTValidator::ValidateAmount(double amount) {
    return value;
 }
 
-//+------------------------------------------------------------------+
-//| Validate the amount                                              |
-//+------------------------------------------------------------------+
 string ATTValidator::ValidatePointsToTrade(double pointsToTrade) {
 
    string value = "";
@@ -102,9 +82,6 @@ string ATTValidator::ValidatePointsToTrade(double pointsToTrade) {
    return value;
 }
 
-//+------------------------------------------------------------------+
-//| Validate the stops                                               |
-//+------------------------------------------------------------------+
 string ATTValidator::ValidateStops(double trailingLoss, double tralingProfit, double tralingProfitStep) {
 
    string value = "";
@@ -126,9 +103,6 @@ string ATTValidator::ValidateStops(double trailingLoss, double tralingProfit, do
    return value;
 }
 
-//+------------------------------------------------------------------+
-//| Validate the stops                                               |
-//+------------------------------------------------------------------+
 string ATTValidator::ValidateDailyLimits(double loss, double profit) {
 
    string value = "";
@@ -142,11 +116,6 @@ string ATTValidator::ValidateDailyLimits(double loss, double profit) {
    return value;
 }
 
-
-
-//+------------------------------------------------------------------+
-//| Validate avarages                                               |
-//+------------------------------------------------------------------+
 string ATTValidator::ValidateAverages(double shortAvg, double longAvg, double tradingLevel) {
 
    string value = "";

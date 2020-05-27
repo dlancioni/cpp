@@ -1,20 +1,10 @@
 #include <Trade\Trade.mqh>
 #include "ATTDef.mqh"
 
-// https://www.mql5.com/pt/docs/standardlibrary/tradeclasses/ctrade
-
-//+------------------------------------------------------------------+
-//|                                                     ATTOrder.mqh |
-//|                        Copyright 2019, MetaQuotes Software Corp. |
-//|                                             https://www.mql5.com |
-//+------------------------------------------------------------------+
 #property copyright "Copyright 2019, MetaQuotes Software Corp."
 #property link      "https://www.mql5.com"
 #property version   "1.00"
 
-//+------------------------------------------------------------------+
-//| Provide methods do open and close deals                          |
-//+------------------------------------------------------------------+
 class ATTOrder : public CTrade {
    private:
        ulong Order(_ORDER_TYPE type, string, string, double, double, double, double, ENUM_ORDER_TYPE_TIME, datetime);
@@ -28,9 +18,6 @@ class ATTOrder : public CTrade {
        ulong OrderCount(string);
 };
 
-//+------------------------------------------------------------------+
-//| Open or close position at market price                           |
-//+------------------------------------------------------------------+
 ulong ATTOrder::Buy(_ORDER_TYPE type, const string symbol=NULL, double qtt=0.0, double price=0.0, double sl=0.0, double tp=0.0, ENUM_ORDER_TYPE_TIME expireType=ORDER_TIME_GTC, datetime expireTime=0) {
    return ATTOrder::Order(type, "BUY", symbol, qtt, price, sl, tp, expireType, expireTime);
 }
@@ -38,9 +25,6 @@ ulong ATTOrder::Sell(_ORDER_TYPE type, const string symbol=NULL, double qtt=0.0,
    return ATTOrder::Order(type, "SELL", symbol, qtt, price, sl, tp, expireType, expireTime);
 }
 
-//+------------------------------------------------------------------+
-//| Core logic to open and close positions at market price           |
-//+------------------------------------------------------------------+
 ulong ATTOrder::Order(_ORDER_TYPE type, const string bs, const string symbol=NULL, double qtt=0.0, double price=0.0, double sl=0.0, double tp=0.0, ENUM_ORDER_TYPE_TIME expireType=ORDER_TIME_GTC, datetime expireTime=0) {
 
    // General Declaration
@@ -95,17 +79,11 @@ ulong ATTOrder::Order(_ORDER_TYPE type, const string bs, const string symbol=NUL
    return tid;
 }
 
-//+------------------------------------------------------------------+
-//| Modify existing order                                            |
-//+------------------------------------------------------------------+
 bool ATTOrder::AmmendOrder(ulong ticket, double price, double sl, double tp) {
    CTrade trade;
    return trade.OrderModify(ticket, price, sl, tp, 0, 0, 0);
 }
 
-//+------------------------------------------------------------------+
-//| Close all open orders                                            |
-//+------------------------------------------------------------------+
 ulong ATTOrder::CloseAllOrders() {
 
     // General Declaration
@@ -125,9 +103,6 @@ ulong ATTOrder::CloseAllOrders() {
      return 0;   
 }
 
-//+------------------------------------------------------------------+
-//| Close all open orders                                            |
-//+------------------------------------------------------------------+
 ulong ATTOrder::OrderCount(string _symbol) {
 
     // General Declaration

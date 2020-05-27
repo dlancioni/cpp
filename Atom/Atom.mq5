@@ -168,7 +168,7 @@ void tradeCrossoverStrategy(string symbol) {
    if (shortAvg > longAvg) {
        if (slb == 0.0) {
            // need round tick size
-           slb = ATPrice.Subtract(shortAvg, 1);
+           slb = ATPrice.Subtract(shortAvg, 5);
            sls = 0;
        }
        if (diffAvg > _diffAvg) {
@@ -182,7 +182,7 @@ void tradeCrossoverStrategy(string symbol) {
    if (shortAvg < longAvg) {         
        if (sls == 0.0) {
            // need round tick size       
-           sls = ATPrice.Sum(shortAvg, 1);
+           sls = ATPrice.Sum(shortAvg, 5);
            slb = 0;
        }
        if (diffAvg > _diffAvg) {
