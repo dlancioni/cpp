@@ -10,11 +10,11 @@ class ATTValidator {
       string ValidateExpired();
       string ValidateAmount(double);
       string ValidatePointsToTrade(double);
-      string ValidateStops(double, double, double);
+      string ValidateStops(double);
       string ValidateDailyLimits(double, double);
       string ValidateAverages(double, double, double);
    public:
-      string ValidateParameters(double, double, double, double, double, double, double, double, double, double, double, double);
+      string ValidateParameters(double, double, double, double, double, double, double, double, double, double);
 
 };
 
@@ -25,8 +25,6 @@ string ATTValidator::ValidateParameters(double dailyLoss,
                                         double pointsLoss,
                                         double pointsProfit, 
                                         double trailingLoss, 
-                                        double tralingProfit, 
-                                        double tralingProfitStep,
                                         double mavgShort,
                                         double mavgLong,
                                         double tradingLevel) {
@@ -38,7 +36,7 @@ string ATTValidator::ValidateParameters(double dailyLoss,
    if (value == "") value = ValidateDailyLimits(dailyLoss, dailyProfit);   
    if (value == "") value = ATTValidator::ValidateAmount(contracts);
    if (value == "") value = ATTValidator::ValidatePointsToTrade(pointsTrade);
-   if (value == "") value = ATTValidator::ValidateStops(trailingLoss, tralingProfit, tralingProfitStep);
+   if (value == "") value = ATTValidator::ValidateStops(trailingLoss);
    if (value == "") value = ATTValidator::ValidateAverages(mavgShort, mavgLong, tradingLevel);
    
    return value;
@@ -82,22 +80,12 @@ string ATTValidator::ValidatePointsToTrade(double pointsToTrade) {
    return value;
 }
 
-string ATTValidator::ValidateStops(double trailingLoss, double tralingProfit, double tralingProfitStep) {
+string ATTValidator::ValidateStops(double trailingLoss) {
 
    string value = "";
       
    if (trailingLoss < 0) {
       value = "Points stop loss is mandatory";
-   }
-
-   if (tralingProfit > 0) {
-      if (tralingProfitStep <= 0) {
-         value = "TakeProfit is mandatory";
-      }      
-   }
-   
-   if (tralingProfitStep > tralingProfit)    {
-         value = "Trailing profit step cannot be greater than trailing stop";   
    }
 
    return value;

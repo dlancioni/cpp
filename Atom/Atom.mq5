@@ -36,8 +36,6 @@ input double _pointsProfit = 0;             // Points take profit
 input double _pointsTrade = 0;              // Points after current price to open trade
 input string Trailing = "----------";       // Trailing info 
 input double _trailingLoss = 0;             // Points to trail stop loss
-input double _tralingProfit = 0;            // Points to trigger dinamic stop profit
-input double _tralingProfitStep = 0;        // Points to trail take profit
 
 
 //
@@ -71,8 +69,6 @@ int OnInit() {
                                         _pointsLoss,
                                         _pointsProfit, 
                                         _trailingLoss, 
-                                        _tralingProfit, 
-                                        _tralingProfitStep,
                                         _shortAvg,
                                         _longAvg,
                                         _diffAvg);
@@ -234,11 +230,7 @@ void tradeCrossoverStrategy(string symbol) {
          orderId = ATOrder.Sell(_ORDER_TYPE::MARKET, symbol, _contracts, price, sls, tp);
       }
    } else {
-       ATPosition.TrailStop(_pointsLoss, _trailingLoss, _tralingProfit, _tralingProfitStep);
-   }
-   
-   // Log variableon experts tab
-   Print("shortAvg: ", shortAvg, " longAvg: ", longAvg, " diffAvg: ", diffAvg, "_diffAvg: ", _diffAvg, " slss: ", sls, " slb:", slb);
-   
+       ATPosition.TrailStop(_pointsLoss, _trailingLoss);
+   }  
    
 }
