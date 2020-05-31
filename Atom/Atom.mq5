@@ -173,7 +173,8 @@ void tradeCrossoverStrategy(string symbol) {
            sell = false;
        }
        price = ATSymbol.Ask();
-    }        
+    }
+
     if (shortAvg < longAvg) {         
        if (sls == 0.0) {
            sls = ATPrice.Sum(shortAvg, 5);
@@ -191,7 +192,7 @@ void tradeCrossoverStrategy(string symbol) {
     points = MathAbs(ATPrice.GetPoints(price, shortAvg));
     if (points > _limit) {
        buy = false;
-       sell = true;      
+       sell = false;      
     }   
     
     // Calculate loss if necessary
@@ -222,17 +223,14 @@ void tradeCrossoverStrategy(string symbol) {
     }
     
     // Do not open more than one position at a time    
-    if (PositionsTotal() == 0) {
-       
+    if (PositionsTotal() == 0) {       
         if (buy) {        
             orderId = ATOrder.Buy(_ORDER_TYPE::MARKET, symbol, _contracts, price, slb, tpb);
         }        
         if (sell) {
             orderId = ATOrder.Sell(_ORDER_TYPE::MARKET, symbol, _contracts, price, sls, tps);
-        }
-        
+        }        
         ATPosition.SetTrailStopLoss(_pointsTrailLoss);        
-        
     } else {
        ATPosition.TrailStop();
     }

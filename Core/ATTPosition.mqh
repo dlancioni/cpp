@@ -10,15 +10,14 @@
 
 class ATTPosition : public CPositionInfo {
     private:
+        double _pointsTrailLoss;
+        double _priceTrailLoss;
         bool ModifyPosition(ulong orderId, double sl, double tp);    
-        double pointsTrailLoss;
-        double pointsTrailProfit;
     public:
         ATTPosition();
         ~ATTPosition();
         void TrailStop();
         void SetTrailStopLoss(double);
-        void SetTrailStopProfit(double);           
         void CloseAllPositions();
 };
 
@@ -57,11 +56,8 @@ bool ATTPosition::ModifyPosition(ulong id=0, double sl=0.0, double tp=0.0) {
 }
 
 void ATTPosition::SetTrailStopLoss(double value) {
-    ATTPosition::pointsTrailLoss = value;
-}
-
-void ATTPosition::SetTrailStopProfit(double value) {
-    ATTPosition::pointsTrailProfit = value; 
+    ATTPosition::_priceTrailLoss = 0;
+    ATTPosition::_pointsTrailLoss = value;
 }
 
 //
@@ -71,6 +67,7 @@ void ATTPosition::TrailStop() {
 
     // General Declaration
     ulong ticketId = 0;
+    double price = 0;
     double priceDeal = 0;
     double priceLoss = 0;
     double priceProfit = 0;
@@ -83,7 +80,7 @@ void ATTPosition::TrailStop() {
     ATTOrder _ATTOrder;   
     
     // Check if need trail
-    if (ATTPosition::pointsTrailLoss > 0) {   
+    if (_pointsTrailLoss > 0) {   
         // Iterate over open positions
         for (int i=PositionsTotal()-1; i>=0; i--) {
             // Get current deal
@@ -99,19 +96,34 @@ void ATTPosition::TrailStop() {
                     dealType = PositionGetInteger(POSITION_TYPE);
                     contracts = PositionGetDouble(POSITION_VOLUME);
                     
-                    
-                    //_ATTPrice.GetPoints(_ATTSymbol.Ask, priceDeal);
-                    
-                    
                     // Recalculate the price
                     if (dealType == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
-                        priceLoss = _ATTPrice.Sum(priceLoss, 10 );
-                    } else {               
-                        priceLoss = _ATTPrice.Subtract(priceLoss, 10);
-                    }
                     
-                    // Channge position by adding new stop loss
-                    ATTPosition::ModifyPosition(ticketId, priceLoss, priceProfit);
+                        // Accumulate points on break
+                        if (_priceTrailLoss == 0) {
+                            _priceTrailLoss = _ATTPrice.Sum(priceDeal, _pointsTrailLoss);
+                        }
+                        
+                        price = _ATTSymbol.Ask();
+                        if (price > _priceTrailLoss) {
+                            _priceTrailLoss = _ATTPrice.Sum(_priceTrailLoss, _pointsTrailLoss);
+                            priceLoss = _ATTPrice.Sum(priceLoss, _pointsTrailLoss);
+                            ATTPosition::ModifyPosition(ticketId, priceLoss, priceProfit);
+                        }
+                        
+                    } else {               
+                        // Accumulate points on break
+                        if (_priceTrailLoss == 0) {
+                            _priceTrailLoss = _ATTPrice.Subtract(priceDeal, _pointsTrailLoss);
+                        }
+                        
+                        price = _ATTSymbol.Bid();
+                        if (price < _priceTrailLoss) {
+                            _priceTrailLoss = _ATTPrice.Subtract(_priceTrailLoss, _pointsTrailLoss);
+                            priceLoss = _ATTPrice.Subtract(priceLoss, _pointsTrailLoss);
+                            ATTPosition::ModifyPosition(ticketId, priceLoss, priceProfit);
+                        }
+                    }
                 }                
             }
         }
