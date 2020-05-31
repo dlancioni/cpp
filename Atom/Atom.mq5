@@ -29,13 +29,13 @@ input ENUM_TIMEFRAMES _chartTime = 1;       // Chart time
 input int _shortAvg = 0;                    // Short moving avarage
 input int _longAvg = 0;                     // Long moving avarage
 input double _diffAvg = 0;                  // Averages difference to open position
+input double _limit = 0;                    // Difference between price on cross and current price
 input string TradeInfo = "----------";      // Trade Info 
 input double _contracts = 0;                // Number of Contracts
 input double _pointsLoss = 0;               // Points stop loss (zero close on cross)
 input double _pointsProfit = 0;             // Points take profit
-input double _pointsTrade = 0;              // Points after current price to open trade
 input string Trailing = "----------";       // Trailing info 
-input double _trailingLoss = 0;             // Points to trail stop loss
+input double _pointsTrailLoss = 0;          // Points to trigger trailing stop loss
 
 
 //
@@ -65,10 +65,9 @@ int OnInit() {
    msg = ATValidator.ValidateParameters(_dailyLoss, 
                                         _dailyProfit,
                                         _contracts, 
-                                        _pointsTrade, 
                                         _pointsLoss,
                                         _pointsProfit, 
-                                        _trailingLoss, 
+                                        _pointsTrailLoss, 
                                         _shortAvg,
                                         _longAvg,
                                         _diffAvg);
@@ -128,42 +127,43 @@ void OnTick() {
 //
 void tradeCrossoverStrategy(string symbol) {
 
-   // General declaration
-   const string UP = "UP";
-   const string DN = "DN";
-   
-   bool buy = false;
-   bool sell = false;   
-   ulong orderId = 0;
-   double price = 0;
-   double shortAvg = 0;
-   double longAvg = 0;
-   double diffAvg = 0;
-   double tp = 0;   
+    // General declaration
+    const string UP = "UP";
+    const string DN = "DN";
+    
+    bool buy = false;
+    bool sell = false;   
+    ulong orderId = 0;
+    double shortAvg = 0;
+    double longAvg = 0;
+    double diffAvg = 0;
+    double tpb = 0;
+    double price = 0;
+    double points = 0;
+    double tps = 0;
+    double ptsl = 0;
+    double ptsp = 0;
       
-   // Get avgs and calculate difference
-   shortAvg = ATIndicator.CalculateMovingAvarage(symbol, _chartTime, _shortAvg);
-   longAvg = ATIndicator.CalculateMovingAvarage(symbol, _chartTime, _longAvg);
-   diffAvg = MathAbs(ATMath.Subtract(longAvg, shortAvg));
+    // Get avgs and calculate difference
+    shortAvg = ATIndicator.CalculateMovingAvarage(symbol, _chartTime, _shortAvg);
+    longAvg = ATIndicator.CalculateMovingAvarage(symbol, _chartTime, _longAvg);
+    diffAvg = MathAbs(ATMath.Subtract(longAvg, shortAvg));
    
-   // Ajust according to digits
-   switch (Digits()) {
-      case 3:
-         diffAvg = diffAvg * 10;
-         break;   
-      case 5:
-         diffAvg = diffAvg * 100000;
-         break;
-      default:
-         diffAvg = diffAvg;       
-   }
+    // Ajust according to digits
+    switch (Digits()) {
+    case 3:
+        diffAvg = diffAvg * 10;
+        break;
+    case 5:
+        diffAvg = diffAvg * 100000;
+        break;
+    }
    
-   Comment("Diff: ", diffAvg, " Cross: ", lastCross, " PnL: ", dailyPnL);
-   
-   // Cross UP
-   if (shortAvg > longAvg) {
+    Comment("Diff: ", diffAvg, " Cross: ", lastCross, " PnL: ", dailyPnL);
+
+    // Calculate stop loss
+    if (shortAvg > longAvg) {
        if (slb == 0.0) {
-           // need round tick size
            slb = ATPrice.Subtract(shortAvg, 5);
            sls = 0;
        }
@@ -172,65 +172,69 @@ void tradeCrossoverStrategy(string symbol) {
            buy = true;
            sell = false;
        }
-   }  
-   
-   // Cross DN   
-   if (shortAvg < longAvg) {         
+       price = ATSymbol.Ask();
+    }        
+    if (shortAvg < longAvg) {         
        if (sls == 0.0) {
-           // need round tick size       
            sls = ATPrice.Sum(shortAvg, 5);
            slb = 0;
        }
        if (diffAvg > _diffAvg) {
-          cross = DN;
-          buy = false;
-          sell = true;
+           cross = DN;
+           buy = false;
+           sell = true;
        }
-   }
-
-   // Trade on cross only
-   if (lastCross != cross) {
+       price = ATSymbol.Bid();
+    }
+   
+    // Price exploded in single candle, no trade
+    points = MathAbs(ATPrice.GetPoints(price, shortAvg));
+    if (points > _limit) {
+       buy = false;
+       sell = true;      
+    }   
+    
+    // Calculate loss if necessary
+    if (_pointsLoss > 0) {
+      slb = ATPrice.Subtract(price, _pointsLoss);
+      sls = ATPrice.Sum(price, _pointsLoss);
+    }
+    
+    // Calculate stop profit   
+    tpb = ATPrice.Sum(price, _pointsProfit);
+    tps = ATPrice.Subtract(price, _pointsProfit);   
+    
+    // Trade on cross only
+    if (lastCross != cross) {
       lastCross = cross;
-   } else {
+    } else {
       buy = false;
       sell = false;   
-   }
+    }
 
-   // True indicates a trade signal was identified
-   if (buy || sell) {
+    // True indicates a trade signal was identified
+    if (buy || sell) {
       ATOrder.CloseAllOrders();
       ATPosition.CloseAllPositions();
-   } else {
-      buy = false;
+    } else {
+       buy = false;
       sell = false;
-   }
-   
-   // Points loss informed, disregard automatic prices
-   if (_pointsLoss > 0) {
-       slb = 0;
-       sls = 0;       
-   }
-
-   // Do not open more than one position at a time
-   if (PositionsTotal() == 0) {
-      if (buy) {
-         price = ATPrice.Sum(ATSymbol.Ask(), _pointsTrade);
-         if (slb == 0) {
-             slb = ATPrice.Subtract(price, _pointsLoss);
-         }    
-         tp = ATPrice.Sum(price, _pointsProfit);
-         orderId = ATOrder.Buy(_ORDER_TYPE::MARKET, symbol, _contracts, price, slb, tp);
-      }
-      if (sell) {
-         price = ATPrice.Subtract(ATSymbol.Bid(), _pointsTrade);
-         if (sls == 0) {         
-            sls = ATPrice.Sum(price, _pointsLoss);
-         }
-         tp = ATPrice.Subtract(price, _pointsProfit);
-         orderId = ATOrder.Sell(_ORDER_TYPE::MARKET, symbol, _contracts, price, sls, tp);
-      }
-   } else {
-       ATPosition.TrailStop(_pointsLoss, _trailingLoss);
-   }  
+    }
+    
+    // Do not open more than one position at a time    
+    if (PositionsTotal() == 0) {
+       
+        if (buy) {        
+            orderId = ATOrder.Buy(_ORDER_TYPE::MARKET, symbol, _contracts, price, slb, tpb);
+        }        
+        if (sell) {
+            orderId = ATOrder.Sell(_ORDER_TYPE::MARKET, symbol, _contracts, price, sls, tps);
+        }
+        
+        ATPosition.SetTrailStopLoss(_pointsTrailLoss);        
+        
+    } else {
+       ATPosition.TrailStop();
+    }
    
 }

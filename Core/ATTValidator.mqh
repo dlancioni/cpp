@@ -9,19 +9,17 @@ class ATTValidator {
    private:
       string ValidateExpired();
       string ValidateAmount(double);
-      string ValidatePointsToTrade(double);
       string ValidateStops(double);
       string ValidateDailyLimits(double, double);
       string ValidateAverages(double, double, double);
    public:
-      string ValidateParameters(double, double, double, double, double, double, double, double, double, double);
+      string ValidateParameters(double, double, double, double, double, double, double, double, double);
 
 };
 
 string ATTValidator::ValidateParameters(double dailyLoss, 
                                         double dailyProfit,
                                         double contracts, 
-                                        double pointsTrade, 
                                         double pointsLoss,
                                         double pointsProfit, 
                                         double trailingLoss, 
@@ -35,7 +33,6 @@ string ATTValidator::ValidateParameters(double dailyLoss,
    if (value == "") value = ATTValidator::ValidateExpired();
    if (value == "") value = ValidateDailyLimits(dailyLoss, dailyProfit);   
    if (value == "") value = ATTValidator::ValidateAmount(contracts);
-   if (value == "") value = ATTValidator::ValidatePointsToTrade(pointsTrade);
    if (value == "") value = ATTValidator::ValidateStops(trailingLoss);
    if (value == "") value = ATTValidator::ValidateAverages(mavgShort, mavgLong, tradingLevel);
    
@@ -66,16 +63,6 @@ string ATTValidator::ValidateAmount(double amount) {
       
    if (amount <= 0)
       value = "Must inform number of contracts (amount)";
-
-   return value;
-}
-
-string ATTValidator::ValidatePointsToTrade(double pointsToTrade) {
-
-   string value = "";
-      
-   if (pointsToTrade < 0)
-      value = "Points to trade cannot be negative";
 
    return value;
 }
