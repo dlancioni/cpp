@@ -187,13 +187,6 @@ void tradeCrossoverStrategy(string symbol) {
        }
        price = ATSymbol.Bid();
     }
-   
-    // Price exploded in single candle, no trade
-    points = MathAbs(ATPrice.GetPoints(price, shortAvg));
-    if (points > _limit) {
-       buy = false;
-       sell = false;      
-    }   
     
     // Calculate loss if necessary
     if (_pointsLoss > 0) {
