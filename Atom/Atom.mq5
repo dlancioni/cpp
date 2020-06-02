@@ -29,14 +29,13 @@ input ENUM_TIMEFRAMES _chartTime = 1;       // Chart time
 input int _shortAvg = 0;                    // Short moving avarage
 input int _longAvg = 0;                     // Long moving avarage
 input double _diffAvg = 0;                  // Averages difference to open position
-input double _limit = 0;                    // Difference between price on cross and current price
 input string TradeInfo = "----------";      // Trade Info 
 input double _contracts = 0;                // Number of Contracts
 input double _pointsLoss = 0;               // Points stop loss (zero close on cross)
 input double _pointsProfit = 0;             // Points take profit
-input string Trailing = "----------";       // Trailing info 
-input double _checkpoints = 0;              // Checkpoints over price
-input double _points = 0;                   // Points to calculate on checkpoints
+input string Trailing = "----------";       // Trailing info
+input double _checkpoints = 0;              // Points to accummulate over price deal
+input double _points = 0;                   // Points to calculate stops
 
 
 //
