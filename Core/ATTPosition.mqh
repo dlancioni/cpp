@@ -10,14 +10,15 @@
 
 class ATTPosition : public CPositionInfo {
     private:
-        double _pointsTrailLoss;
-        double _priceTrailLoss;
+        double _checkpoints;
+        double _points;
+        double _priceCheckpoint;
         bool ModifyPosition(ulong orderId, double sl, double tp);    
     public:
         ATTPosition();
         ~ATTPosition();
         void TrailStop();
-        void SetTrailStopLoss(double);
+        void SetTrailStopLoss(double, double);
         void CloseAllPositions();
 };
 
@@ -55,9 +56,10 @@ bool ATTPosition::ModifyPosition(ulong id=0, double sl=0.0, double tp=0.0) {
     return status;
 }
 
-void ATTPosition::SetTrailStopLoss(double value) {
-    ATTPosition::_priceTrailLoss = 0;
-    ATTPosition::_pointsTrailLoss = value;
+void ATTPosition::SetTrailStopLoss(double value, double points) {
+    ATTPosition::_priceCheckpoint = 0;
+    ATTPosition::_checkpoints = value;
+    ATTPosition::_points = points;
 }
 
 //
@@ -80,7 +82,7 @@ void ATTPosition::TrailStop() {
     ATTOrder _ATTOrder;   
     
     // Check if need trail
-    if (_pointsTrailLoss > 0) {   
+    if (_checkpoints > 0) {   
         // Iterate over open positions
         for (int i=PositionsTotal()-1; i>=0; i--) {
             // Get current deal
@@ -99,28 +101,27 @@ void ATTPosition::TrailStop() {
                     // Recalculate the price
                     if (dealType == ENUM_POSITION_TYPE::POSITION_TYPE_BUY) {
                     
-                        // Accumulate points on break
-                        if (_priceTrailLoss == 0) {
-                            _priceTrailLoss = _ATTPrice.Sum(priceDeal, _pointsTrailLoss);
+                        if (_priceCheckpoint == 0) {
+                            _priceCheckpoint = _ATTPrice.Sum(priceDeal, _checkpoints);
                         }
                         
                         price = _ATTSymbol.Ask();
-                        if (price > _priceTrailLoss) {
-                            _priceTrailLoss = _ATTPrice.Sum(_priceTrailLoss, _pointsTrailLoss);
-                            priceLoss = _ATTPrice.Sum(priceLoss, _pointsTrailLoss);
+                        if (price > _priceCheckpoint) {
+                            _priceCheckpoint = _ATTPrice.Sum(_priceCheckpoint, _checkpoints);
+                            priceLoss = _ATTPrice.Sum(priceLoss, _points);
                             ATTPosition::ModifyPosition(ticketId, priceLoss, priceProfit);
                         }
                         
                     } else {               
-                        // Accumulate points on break
-                        if (_priceTrailLoss == 0) {
-                            _priceTrailLoss = _ATTPrice.Subtract(priceDeal, _pointsTrailLoss);
+
+                        if (_priceCheckpoint == 0) {
+                            _priceCheckpoint = _ATTPrice.Subtract(priceDeal, _checkpoints);
                         }
                         
                         price = _ATTSymbol.Bid();
-                        if (price < _priceTrailLoss) {
-                            _priceTrailLoss = _ATTPrice.Subtract(_priceTrailLoss, _pointsTrailLoss);
-                            priceLoss = _ATTPrice.Subtract(priceLoss, _pointsTrailLoss);
+                        if (price < _priceCheckpoint) {
+                            _priceCheckpoint = _ATTPrice.Subtract(_priceCheckpoint, _checkpoints);
+                            priceLoss = _ATTPrice.Subtract(priceLoss, _points);
                             ATTPosition::ModifyPosition(ticketId, priceLoss, priceProfit);
                         }
                     }

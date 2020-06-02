@@ -35,7 +35,8 @@ input double _contracts = 0;                // Number of Contracts
 input double _pointsLoss = 0;               // Points stop loss (zero close on cross)
 input double _pointsProfit = 0;             // Points take profit
 input string Trailing = "----------";       // Trailing info 
-input double _pointsTrailLoss = 0;          // Points to trigger trailing stop loss
+input double _checkpoints = 0;              // Checkpoints over price
+input double _points = 0;                   // Points to calculate on checkpoints
 
 
 //
@@ -67,7 +68,7 @@ int OnInit() {
                                         _contracts, 
                                         _pointsLoss,
                                         _pointsProfit, 
-                                        _pointsTrailLoss, 
+                                        _checkpoints, 
                                         _shortAvg,
                                         _longAvg,
                                         _diffAvg);
@@ -223,7 +224,7 @@ void tradeCrossoverStrategy(string symbol) {
         if (sell) {
             orderId = ATOrder.Sell(_ORDER_TYPE::MARKET, symbol, _contracts, price, sls, tps);
         }        
-        ATPosition.SetTrailStopLoss(_pointsTrailLoss);        
+        ATPosition.SetTrailStopLoss(_checkpoints, _points);
     } else {
        ATPosition.TrailStop();
     }
