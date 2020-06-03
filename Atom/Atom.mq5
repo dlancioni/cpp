@@ -29,6 +29,7 @@ input ENUM_TIMEFRAMES _chartTime = 1;       // Chart time
 input int _shortAvg = 0;                    // Short moving avarage
 input int _longAvg = 0;                     // Long moving avarage
 input double _diffAvg = 0;                  // Averages difference to open position
+input double _limitPoint = 0;               // Points limit between short cross and price
 input string TradeInfo = "----------";      // Trade Info 
 input double _contracts = 0;                // Number of Contracts
 input double _pointsLoss = 0;               // Points stop loss (zero close on cross)
@@ -104,49 +105,51 @@ void OnDeinit(const int reason) {
 //
 void OnTick() {
 
-   string symbol = Symbol();
-   double bid = 0.0;         // Current bid price 
-   double ask = 0.0;         // Current ask price
-  
-   // Get prices   
-   bid = ATSymbol.Bid();
-   ask = ATSymbol.Ask();
+    string symbol = Symbol();
+    double bid = 0.0;         // Current bid price 
+    double ask = 0.0;         // Current ask price
+    double shortAvg = 0; 
+    double longAvg = 0;
+    
+    // Get prices   
+    bid = ATSymbol.Bid();
+    ask = ATSymbol.Ask();
+   
+    // Get avgs and calculate difference
+    shortAvg = ATIndicator.CalculateMovingAvarage(symbol, _chartTime, _shortAvg);
+    longAvg = ATIndicator.CalculateMovingAvarage(symbol, _chartTime, _longAvg);   
 
-   // If no price, no deal (markets closed, or off-line)
-   if (bid > 0 && ask > 0) {
-      if (!ATBalance.IsResultOverLimits(dailyPnL, _dailyLoss, _dailyProfit)) {
-         tradeCrossoverStrategy(symbol);
-      }
-   } else {
-       Print("No price available");
-   }
+    // If no price, no deal (markets closed, or off-line)
+    if (!ATBalance.IsResultOverLimits(dailyPnL, _dailyLoss, _dailyProfit)) {
+        if (bid > 0 && ask > 0) {
+            if (shortAvg > 0 && longAvg > 0) {
+                tradeCrossoverStrategy(symbol, bid, ask, shortAvg, longAvg );
+            } else {
+                Print("No moving avarage available");
+            }
+        } else {
+            Print("No price available");
+        }
+    }
 }
 
 //
 // Open position as indicators are attended
 //
-void tradeCrossoverStrategy(string symbol) {
+void tradeCrossoverStrategy(string symbol, double bid = 0, double ask = 0, double shortAvg = 0, double longAvg = 0) {
 
     // General declaration
     const string UP = "UP";
     const string DN = "DN";
     
-    bool buy = false;
-    bool sell = false;   
     ulong orderId = 0;
-    double shortAvg = 0;
-    double longAvg = 0;
     double diffAvg = 0;
     double tpb = 0;
-    double price = 0;
-    double points = 0;
     double tps = 0;
-    double ptsl = 0;
-    double ptsp = 0;
+    bool buy = false;
+    bool sell = false;    
       
-    // Get avgs and calculate difference
-    shortAvg = ATIndicator.CalculateMovingAvarage(symbol, _chartTime, _shortAvg);
-    longAvg = ATIndicator.CalculateMovingAvarage(symbol, _chartTime, _longAvg);
+    // Calculate avarage difference
     diffAvg = MathAbs(ATMath.Subtract(longAvg, shortAvg));
    
     // Ajust according to digits
@@ -160,68 +163,64 @@ void tradeCrossoverStrategy(string symbol) {
     }
    
     Comment("Diff: ", diffAvg, " Cross: ", lastCross, " PnL: ", dailyPnL);
+    
+    // Keep prices
+    bid = ATSymbol.Bid();
+    ask = ATSymbol.Ask();
 
-    // Calculate stop loss
-    if (shortAvg > longAvg) {
+    // Calculate profit & loss
+    tpb = ATPrice.Sum(ask, _pointsProfit);
+    tps = ATPrice.Subtract(bid, _pointsProfit);    
+    if (_pointsLoss > 0) {
+       slb = ATPrice.Subtract(ask, _pointsLoss);
+       sls = ATPrice.Sum(bid, _pointsLoss);
+    }
+
+    // Crossover logic
+    if (shortAvg > longAvg) {      
        if (slb == 0.0) {
            slb = ATPrice.Subtract(shortAvg, 5);
            sls = 0;
        }
        if (diffAvg > _diffAvg) {
-           cross = UP;
-           buy = true;
-           sell = false;
-       }
-       price = ATSymbol.Ask();
+           if (MathAbs(shortAvg-ask) <= _limitPoint) { 
+               cross = UP;
+               buy = true;
+               sell = false;
+           }
+       }       
     }
-
-    if (shortAvg < longAvg) {         
+    if (shortAvg < longAvg) {    
        if (sls == 0.0) {
            sls = ATPrice.Sum(shortAvg, 5);
            slb = 0;
        }
        if (diffAvg > _diffAvg) {
-           cross = DN;
-           buy = false;
-           sell = true;
-       }
-       price = ATSymbol.Bid();
-    }
-    
-    // Calculate loss if necessary
-    if (_pointsLoss > 0) {
-      slb = ATPrice.Subtract(price, _pointsLoss);
-      sls = ATPrice.Sum(price, _pointsLoss);
-    }
-    
-    // Calculate stop profit   
-    tpb = ATPrice.Sum(price, _pointsProfit);
-    tps = ATPrice.Subtract(price, _pointsProfit);   
-    
-    // Trade on cross only
-    if (lastCross != cross) {
-      lastCross = cross;
-    } else {
-      buy = false;
-      sell = false;   
+           if (MathAbs(shortAvg-bid) <= _limitPoint) { 
+               cross = DN;
+               buy = false;
+               sell = true;
+           }
+       }              
     }
 
-    // True indicates a trade signal was identified
-    if (buy || sell) {
-      ATOrder.CloseAllOrders();
-      ATPosition.CloseAllPositions();
+    // Trade on cross only
+    if (lastCross != cross) {
+        lastCross = cross;
+        ATOrder.CloseAllOrders();
+        ATPosition.CloseAllPositions();        
     } else {
-       buy = false;
-      sell = false;
+        buy = false;
+        sell = false;
     }
-    
-    // Do not open more than one position at a time    
-    if (PositionsTotal() == 0) {       
+
+    // Just trade
+    if (PositionsTotal() == 0) {    
         if (buy) {        
-            orderId = ATOrder.Buy(_ORDER_TYPE::MARKET, symbol, _contracts, price, slb, tpb);
+            orderId = ATOrder.Buy(_ORDER_TYPE::MARKET, symbol, _contracts, ask, slb, tpb);
         }        
         if (sell) {
-            orderId = ATOrder.Sell(_ORDER_TYPE::MARKET, symbol, _contracts, price, sls, tps);
+            orderId = ATOrder.Sell(_ORDER_TYPE::MARKET, symbol, _contracts, bid, sls, tps);
         }        
         ATPosition.SetTrailStopLoss(_checkpoints, _points);
     } else {
