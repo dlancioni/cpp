@@ -32,7 +32,7 @@ input double _diffAvg = 0;                  // Averages difference to open posit
 input double _limitPoint = 0;               // Points limit between short cross and price
 input string TradeInfo = "----------";      // Trade Info 
 input double _contracts = 0;                // Number of Contracts
-input double _pointsLoss = 0;               // Points stop loss (zero close on cross)
+input double _pointsLoss = 0;               // Loss limit on dynamic calculation
 input double _pointsProfit = 0;             // Points take profit
 input string Trailing = "----------";       // Trailing info
 input double _checkpoints = 0;              // Points to accummulate over price deal
@@ -171,10 +171,6 @@ void tradeCrossoverStrategy(string symbol, double bid = 0, double ask = 0, doubl
     // Calculate profit & loss
     tpb = ATPrice.Sum(ask, _pointsProfit);
     tps = ATPrice.Subtract(bid, _pointsProfit);    
-    if (_pointsLoss > 0) {
-       slb = ATPrice.Subtract(ask, _pointsLoss);
-       sls = ATPrice.Sum(bid, _pointsLoss);
-    }
 
     // Crossover logic
     if (shortAvg > longAvg) {      
@@ -183,10 +179,12 @@ void tradeCrossoverStrategy(string symbol, double bid = 0, double ask = 0, doubl
            sls = 0;
        }
        if (diffAvg > _diffAvg) {
-           if (MathAbs(shortAvg-ask) <= _limitPoint) { 
-               cross = UP;
-               buy = true;
-               sell = false;
+           if (MathAbs(shortAvg-ask) <= _limitPoint) {
+               if (MathAbs(slb-ask) <= _pointsLoss) { 
+                   cross = UP;
+                   buy = true;
+                   sell = false;
+               }
            }
        }       
     }
@@ -196,10 +194,12 @@ void tradeCrossoverStrategy(string symbol, double bid = 0, double ask = 0, doubl
            slb = 0;
        }
        if (diffAvg > _diffAvg) {
-           if (MathAbs(shortAvg-bid) <= _limitPoint) { 
-               cross = DN;
-               buy = false;
-               sell = true;
+           if (MathAbs(shortAvg-bid) <= _limitPoint) {
+               if (MathAbs(sls-bid) <= _pointsLoss) {            
+                   cross = DN;
+                   buy = false;
+                   sell = true;
+               }
            }
        }              
     }
@@ -228,3 +228,7 @@ void tradeCrossoverStrategy(string symbol, double bid = 0, double ask = 0, doubl
     }
    
 }
+
+
+
+
