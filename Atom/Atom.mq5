@@ -175,7 +175,7 @@ void tradeCrossoverStrategy(string symbol, double bid = 0, double ask = 0, doubl
     // Crossover logic
     if (shortAvg > longAvg) {      
        if (slb == 0.0) {
-           slb = ATPrice.Subtract(shortAvg, 5);
+           slb = ATPrice.Subtract(ask, _pointsLoss);
            sls = 0;
        }
        if (diffAvg > _diffAvg) {
@@ -190,7 +190,7 @@ void tradeCrossoverStrategy(string symbol, double bid = 0, double ask = 0, doubl
     }
     if (shortAvg < longAvg) {    
        if (sls == 0.0) {
-           sls = ATPrice.Sum(shortAvg, 5);
+           sls = ATPrice.Sum(bid, _pointsLoss);
            slb = 0;
        }
        if (diffAvg > _diffAvg) {
